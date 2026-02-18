@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import pandas as pd
 import os
+print("SERVER VERSION 3 LOADED")
 
 app = Flask(__name__)
 CORS(app)
+print("NEW VERSION RUNNING")
 
 FILE = "teachers.xlsx"
 
