@@ -148,6 +148,32 @@ document.querySelector("button").onclick = function(e){
     });
 }
 </script>
+<script>
+document.querySelector("button").onclick = function(e){
+    e.preventDefault();
+
+    let data = {};
+    document.querySelectorAll("input, select, textarea").forEach(el=>{
+        if(el.type!="file"){
+            let key = el.previousElementSibling ? el.previousElementSibling.innerText : el.name;
+            data[key] = el.value;
+        }
+    });
+
+    fetch("https://kv-teacher-form.onrender.com/submit",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(data)
+    })
+    .then(res=>res.json())
+    .then(d=>{
+        alert("Form submitted successfully!");
+        window.print();
+    })
+    .catch(err=>alert("Server not reachable"));
+}
+</script>
+
 
 </body>
 </html>
