@@ -58,6 +58,17 @@ def download():
     if os.path.exists(FILE):
         return send_file(FILE, as_attachment=True)
     return "No data available yet. Submit a form first."
+# -------------------------------
+# Send data to dashboard
+# -------------------------------
+@app.route("/data")
+def get_data():
+    if not os.path.exists(FILE):
+        return jsonify([])
+
+    df = pd.read_excel(FILE)
+    return df.fillna("").to_dict(orient="records")
+
 
 
 # -------------------------------
