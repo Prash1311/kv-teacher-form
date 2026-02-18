@@ -81,7 +81,8 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 </table>
 <button type="button" onclick="addAcad()">Add Qualification</button>
 
-<button onclick="window.print()">Submit / Save PDF</button>
+<button id="submitForm">Submit / Save PDF</button>
+
 </div>
 
 <script>
@@ -128,34 +129,15 @@ else{lbl.innerText='Subject';inp.placeholder='';}
 }
 </script>
 <script>
-document.querySelector("button").onclick = function(e){
+document.getElementById("submitForm").addEventListener("click", function(e){
     e.preventDefault();
 
     let data = {};
-    document.querySelectorAll("input, select, textarea").forEach(el=>{
-        if(el.type!="file") data[el.previousElementSibling?.innerText || el.name] = el.value;
-    });
 
-    fetch("http://127.0.0.1:5000/submit",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(data)
-    })
-    .then(r=>r.text())
-    .then(msg=>{
-        alert("Saved Successfully!");
-        window.print();
-    });
-}
-</script>
-<script>
-document.querySelector("button").onclick = function(e){
-    e.preventDefault();
-
-    let data = {};
     document.querySelectorAll("input, select, textarea").forEach(el=>{
-        if(el.type!="file"){
-            let key = el.previousElementSibling ? el.previousElementSibling.innerText : el.name;
+        if(el.type !== "file"){
+            let label = el.closest("div")?.querySelector("label");
+            let key = label ? label.innerText : el.name || "field";
             data[key] = el.value;
         }
     });
@@ -166,13 +148,16 @@ document.querySelector("button").onclick = function(e){
         body:JSON.stringify(data)
     })
     .then(res=>res.json())
-    .then(d=>{
-        alert("Form submitted successfully!");
+    .then(()=>{
+        alert("Form saved to database!");
         window.print();
     })
-    .catch(err=>alert("Server not reachable"));
-}
+    .catch(()=>{
+        alert("Server connection failed");
+    });
+});
 </script>
+
 
 
 </body>
