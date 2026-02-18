@@ -2,7 +2,11 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import pandas as pd
 import os
+<<<<<<< HEAD
 print("SERVER VERSION 3 LOADED")
+=======
+print("NEW VERSION RUNNING")
+>>>>>>> 4f6475392fe3b0e00ae299a081eda23d9ea23ad0
 
 app = Flask(__name__)
 CORS(app)
