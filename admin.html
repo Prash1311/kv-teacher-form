@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KV K.R. Puram - Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 20px; }
+        .grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #0b6efd; border-bottom: 2px solid #0b6efd; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #0b6efd; color: white; }
+        .btn { background: #198754; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; }
+        .btn:hover { background: #146c43; }
+        
+        /* Hidden Print Area */
+        #printArea { display: none; }
+        @media print {
+            body * { display: none; }
+            #printArea, #printArea * { display: block; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Admin Dashboard: Recruitment 2026</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Overview</h3>
+            <canvas id="postChart"></canvas>
+            <p style="text-align: center; margin-top: 15px; font-weight: bold;">
+                Total Applications: <span id="count">0</span>
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Candidate List</h3>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Post</th>
+                        <th>Subject</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="printArea">
+        <h1 style="text-align:center;">KENDRIYA VIDYALAYA K.R. PURAM</h1>
+        <h3>Candidate Application Details</h3>
+        <hr>
+        <div id="printContent"></div>
+    </div>
+
+    <script>
+        const URL = "https://script.google.com/macros/s/AKfycbyE4aa7MXj3Fv_GROJQOPRFY0Th-COWMQezIrd7RCydAYsOgtjGqMdvP78P9n8IPn-W/exec";
+        let allData = [];
+
+        async function loadAdminData() {
+            const response = await fetch(URL);
+            allData = await response.json();
+            
+            document.getElementById('count').innerText = allData.length;
+            renderTable(allData);
+            renderChart(allData);
+        }
+
+        function renderChart(data) {
+            const counts = data.reduce((acc, item) => {
+                const p = item["Post Applied For"] || "Other";
+                acc[p] = (acc[p] || 0) + 1;
+                return acc;
+            }, {});
+
+            new Chart(document.getElementById('postChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        data: Object.values(counts),
+                        backgroundColor: ['#0b6efd', '#198754', '#ffc107', '#dc3545']
+                    }]
+                }
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = data.map((item, index) => `
+                <tr>
+                    <td>${item.Name}</td>
+                    <td>${item["Post Applied For"]}</td>
+                    <td>${item.Subject || 'N/A'}</td>
+                    <td><button class="btn" onclick="printApplication(${index})">Print PDF</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function printApplication(index) {
+            const user = allData[index];
+            const content = `
+                <table style="width:100%; border: 1px solid black; padding: 20px;">
+                    <tr><td><strong>Name:</strong></td><td>${user.Name}</td></tr>
+                    <tr><td><strong>Registration No:</strong></td><td>${user["regNo"] || 'Pending'}</td></tr>
+                    <tr><td><strong>Email:</strong></td><td>${user.Email}</td></tr>
+                    <tr><td><strong>Mobile:</strong></td><td>${user.Mobile}</td></tr>
+                    <tr><td><strong>Post:</strong></td><td>${user["Post Applied For"]}</td></tr>
+                    <tr><td><strong>Subject:</strong></td><td>${user.Subject}</td></tr>
+                    <tr><td><strong>Address:</strong></td><td>${user.Address}</td></tr>
+                </table>
+            `;
+            document.getElementById('printContent').innerHTML = content;
+            window.print();
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>
