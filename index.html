@@ -348,6 +348,14 @@ function expSection(count) {
     return rows;
 }
 
+
+// ===== GET PHOTO FOR SERVER PDF =====
+function getPhotoBase64() {
+    const img = document.querySelector("#preview img");
+    if (!img) return null;
+    return img.src;
+}
+
 // ── Collect ALL form data ──
 function collectData() {
     const qualifications = tableSection('q', 5);
@@ -397,6 +405,8 @@ function collectData() {
         BEd_Name:       document.getElementById("q4_name").value.trim(),
         BEd_Year:       document.getElementById("q4_year").value.trim(),
         BEd_Pct:        document.getElementById("q4_pct").value.trim(),
+	Photo: getPhotoBase64()
+
     };
 }
 
@@ -429,15 +439,45 @@ document.getElementById("submitBtn").addEventListener("click", async function() 
         });
         const result = await res.json();
         if (result.status === "saved") {
-            showSuccess(result.registration);
-        } else {
+
+    // -------- SAVE PDF TO SCHOOL COMPUTER --------
+    try {
+        await fetch("http://127.0.0.1:5000/save-pdf", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                ...data,
+                registration: result.registration
+            })
+        });
+        console.log("PDF stored on server");
+    } catch(e) {
+        console.log("Local PDF save failed", e);
+    }
+
+    showSuccess(result.registration);
+}
+ else {
             throw new Error(result.message || "Unknown error");
         }
     } catch (err) {
         // Fallback / demo mode — still works offline
         const mockReg = "KV-KRP-2026-" + Math.floor(1000 + Math.random() * 9000);
         console.warn("Apps Script not reachable, using demo mode. Data:", data);
-        showSuccess(mockReg);
+        // still save locally even if sheet fails
+try {
+    await fetch("http://127.0.0.1:5000/save-pdf", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            ...data,
+            registration: mockReg
+        })
+    });
+} catch(e){}
+
+showSuccess(mockReg);
+
     }
 });
 
