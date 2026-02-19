@@ -186,6 +186,20 @@
 </div>
 
 <script>
+
+	document.getElementById("postApplied").addEventListener("change", function() {
+    const subjectInput = document.getElementById("subject");
+    if (this.value === "PRT") {
+        subjectInput.value = "All Primary Subjects";
+        subjectInput.disabled = true;
+        subjectInput.style.background = "#e9ecef"; // Gray out
+    } else {
+        subjectInput.value = "";
+        subjectInput.disabled = false;
+        subjectInput.style.background = "#fff";
+    }
+});
+
     // 1. Age Calculation
     function calculateAge() {
         const dob = document.getElementById("dob").value;
