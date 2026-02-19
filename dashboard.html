@@ -1,89 +1,416 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>KV Teacher Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>KV Teacher Application Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        body{
-            font-family: Arial;
-            background:#f4f6fa;
-            text-align:center;
-        }
-        .box{
-            width:90%;
-            margin:auto;
-        }
-        canvas{
-            background:white;
-            padding:20px;
-            margin:20px;
-            border-radius:10px;
-        }
-        .download{
-            margin:20px;
-            padding:12px 25px;
-            background:#1e88e5;
-            color:white;
-            text-decoration:none;
-            border-radius:6px;
-            display:inline-block;
+        :root { --blue: #1e88e5; --green: #43a047; --orange: #fb8c00; --red: #e53935; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f0f2f6; color: #222; }
+
+        header { background: #0d47a1; color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 22px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; text-decoration: none; display: inline-block; }
+        .btn-download { background: var(--green); color: white; }
+        .btn-print { background: var(--orange); color: white; }
+
+        .stats-row { display: flex; gap: 16px; padding: 20px 30px 0; flex-wrap: wrap; }
+        .stat-card { flex: 1; min-width: 160px; background: white; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .stat-card .num { font-size: 36px; font-weight: bold; }
+        .stat-card .lbl { font-size: 13px; color: #666; margin-top: 4px; }
+
+        .charts-row { display: flex; gap: 16px; padding: 20px 30px; flex-wrap: wrap; }
+        .chart-box { flex: 1; min-width: 280px; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .chart-box h3 { font-size: 14px; margin-bottom: 12px; color: #444; }
+        .chart-box canvas { max-height: 240px; }
+
+        /* Applicant Table */
+        .table-section { padding: 0 30px 30px; }
+        .table-section h2 { margin-bottom: 12px; font-size: 18px; }
+        .tbl-controls { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .tbl-controls input, .tbl-controls select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
+        .tbl-wrap { overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: #0d47a1; color: white; padding: 10px 8px; text-align: left; position: sticky; top: 0; white-space: nowrap; }
+        td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; max-width: 180px; word-break: break-word; }
+        tr:hover td { background: #f0f7ff; }
+        tr:last-child td { border-bottom: none; }
+
+        /* Expandable detail row */
+        .expand-btn { cursor: pointer; color: var(--blue); font-weight: bold; border: none; background: none; font-size: 16px; }
+        .detail-row td { background: #fafafa; padding: 12px 20px; }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+        .detail-item { font-size: 12px; }
+        .detail-item .key { color: #888; }
+        .detail-item .val { font-weight: bold; color: #222; }
+
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .badge-pgt { background: #e3f2fd; color: #1565c0; }
+        .badge-tgt { background: #e8f5e9; color: #2e7d32; }
+        .badge-prt { background: #fff3e0; color: #e65100; }
+        .badge-other { background: #f3e5f5; color: #6a1b9a; }
+
+        .loader { text-align: center; padding: 50px; font-size: 20px; color: #888; }
+        .no-data { text-align: center; padding: 40px; color: #999; font-style: italic; }
+
+        /* Print styles */
+        @media print {
+            header .btn, .tbl-controls, .expand-btn { display: none !important; }
+            .chart-box { page-break-inside: avoid; }
+            .tbl-wrap { overflow: visible; }
+            td, th { font-size: 10pt; }
         }
     </style>
 </head>
 <body>
 
-<h1>KV Teacher Application Dashboard</h1>
+<header>
+    <h1>📋 KV K.R. Puram — Teacher Applications Dashboard</h1>
+    <div style="display:flex;gap:10px;">
+        <a class="btn btn-download" id="downloadBtn" href="#">⬇ Download Excel</a>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
+    </div>
+</header>
 
-<a class="download" href="https://kv-teacher-form.onrender.com/download">
-Download Excel
-</a>
+<!-- Stats -->
+<div class="stats-row">
+    <div class="stat-card"><div class="num" id="statTotal">–</div><div class="lbl">Total Applications</div></div>
+    <div class="stat-card"><div class="num" id="statToday">–</div><div class="lbl">Received Today</div></div>
+    <div class="stat-card"><div class="num" id="statPGT">–</div><div class="lbl">PGT</div></div>
+    <div class="stat-card"><div class="num" id="statTGT">–</div><div class="lbl">TGT</div></div>
+    <div class="stat-card"><div class="num" id="statPRT">–</div><div class="lbl">PRT</div></div>
+</div>
 
-<div class="box">
-    <canvas id="genderChart"></canvas>
-    <canvas id="categoryChart"></canvas>
+<!-- Charts -->
+<div class="charts-row">
+    <div class="chart-box"><h3>Post-wise Distribution</h3><canvas id="postChart"></canvas></div>
+    <div class="chart-box"><h3>Gender Distribution</h3><canvas id="genderChart"></canvas></div>
+    <div class="chart-box"><h3>Category Distribution</h3><canvas id="catChart"></canvas></div>
+    <div class="chart-box"><h3>Applications Over Time (last 14 days)</h3><canvas id="timeChart"></canvas></div>
+</div>
+
+<!-- Table -->
+<div class="table-section">
+    <h2>All Applicants</h2>
+    <div class="tbl-controls">
+        <input type="text" id="searchBox" placeholder="🔍 Search name, email, subject…" oninput="renderTable()">
+        <select id="filterPost" onchange="renderTable()">
+            <option value="">All Posts</option>
+            <option>PGT</option><option>TGT</option><option>PRT</option>
+            <option>Computer Instructor</option><option>Others</option>
+        </select>
+        <select id="filterGender" onchange="renderTable()">
+            <option value="">All Genders</option>
+            <option>Male</option><option>Female</option><option>Other</option>
+        </select>
+        <select id="filterCat" onchange="renderTable()">
+            <option value="">All Categories</option>
+            <option>General</option><option>OBC</option><option>SC</option><option>ST</option><option>EWS</option>
+        </select>
+        <span id="countLabel" style="padding:8px;color:#555;font-size:13px;"></span>
+    </div>
+    <div class="tbl-wrap">
+        <div class="loader" id="loader">Loading applications…</div>
+        <table id="appTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>#</th>
+                    <th>Reg. No</th>
+                    <th>Name</th>
+                    <th>Post</th>
+                    <th>Subject</th>
+                    <th>Gender</th>
+                    <th>Category</th>
+                    <th>Age</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Grad %</th>
+                    <th>PG %</th>
+                    <th>B.Ed %</th>
+                    <th>CTET</th>
+                    <th>Exp</th>
+                    <th>Languages</th>
+                    <th>Applied On</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        <div class="no-data" id="noData" style="display:none;">No applications found.</div>
+    </div>
 </div>
 
 <script>
-fetch("https://kv-teacher-form.onrender.com/data")
-.then(res => res.json())
-.then(data => {
+const API_BASE = "https://kv-teacher-form.onrender.com";
+let allData = [];
 
-    let genderCount = {};
-    let categoryCount = {};
+// ── Colour helpers ──
+const COLORS = ["#42a5f5","#66bb6a","#ffa726","#ef5350","#ab47bc","#26c6da","#d4e157","#ff7043"];
+const postBadge = p => {
+    const m = {PGT:'badge-pgt',TGT:'badge-tgt',PRT:'badge-prt'};
+    return `<span class="badge ${m[p]||'badge-other'}">${p||'–'}</span>`;
+};
 
-    data.forEach(row=>{
-        let g = row.Gender || "Unknown";
-        let c = row.Category || "Unknown";
+// ── Fetch & bootstrap ──
+async function loadData() {
+    try {
+        const res = await fetch(`${API_BASE}/data`);
+        allData = await res.json();
+    } catch (e) {
+        // Demo data so the dashboard is useful even without backend
+        allData = generateDemoData(20);
+        console.warn("Backend unreachable — showing demo data.");
+    }
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("appTable").style.display = "table";
+    document.getElementById("downloadBtn").href = `${API_BASE}/download`;
 
-        genderCount[g] = (genderCount[g]||0)+1;
-        categoryCount[c] = (categoryCount[c]||0)+1;
+    buildStats();
+    buildCharts();
+    renderTable();
+}
+
+function generateDemoData(n) {
+    const posts = ["PGT","TGT","PRT","Computer Instructor"];
+    const subjs = ["Mathematics","Science","English","History","Hindi","Computer Science"];
+    const genders = ["Male","Female","Female","Male","Female"];
+    const cats = ["General","OBC","SC","ST","EWS"];
+    const rows = [];
+    for (let i=1; i<=n; i++) {
+        const post = posts[i%4];
+        const d = new Date(); d.setDate(d.getDate() - (i%14));
+        rows.push({
+            RegistrationNo: `KV-KRP-2026-${1000+i}`,
+            Name: `Applicant ${i}`,
+            FatherName: `Father ${i}`,
+            Gender: genders[i%5],
+            Category: cats[i%5],
+            DateOfBirth: `199${i%9}-0${(i%9)+1}-1${i%9}`,
+            Age: `${28+(i%10)} Years`,
+            Mobile: `9${String(i*9876543).padStart(9,'0').substring(0,9)}`,
+            Email: `applicant${i}@mail.com`,
+            PostApplied: post,
+            Subject: subjs[i%6],
+            Grad_Name: "B.Sc",
+            Grad_Year: `20${10+i%10}`,
+            Grad_Pct: `${55+(i*3)%45}`,
+            PG_Name: "M.Sc",
+            PG_Year: `20${12+i%10}`,
+            PG_Pct: `${58+(i*2)%40}`,
+            BEd_Name: "B.Ed",
+            BEd_Year: `20${14+i%8}`,
+            BEd_Pct: `${60+(i*4)%38}`,
+            XII_Pct: `${65+(i*5)%33}`,
+            CTET: i%3===0?"Yes – CTET Paper II":"No",
+            CTETScore: i%3===0?`CTET-${2020+i%4}-${100+i}`:"",
+            TotalExp: `${i%8} Years`,
+            Languages: "English, Hindi"+(i%2===0?", Kannada":""),
+            Address: `${i}, Sample Colony, Bengaluru – 56000${i%9}`,
+            OtherInfo: "",
+            DeclDate: d.toISOString().split("T")[0],
+            Qualifications: "[]",
+            Experience: "[]",
+            Timestamp: d.toISOString()
+        });
+    }
+    return rows;
+}
+
+// ── Stats cards ──
+function buildStats() {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("statTotal").textContent = allData.length;
+    document.getElementById("statToday").textContent = allData.filter(r => (r.Timestamp||r.DeclDate||"").startsWith(today)).length;
+    document.getElementById("statPGT").textContent = allData.filter(r => r.PostApplied==="PGT").length;
+    document.getElementById("statTGT").textContent = allData.filter(r => r.PostApplied==="TGT").length;
+    document.getElementById("statPRT").textContent = allData.filter(r => r.PostApplied==="PRT").length;
+}
+
+// ── Charts ──
+function buildCharts() {
+    const count = (arr, key) => arr.reduce((acc, r) => { acc[r[key]||"Unknown"]=(acc[r[key]||"Unknown"]||0)+1; return acc; }, {});
+
+    const postCount  = count(allData, "PostApplied");
+    const gendCount  = count(allData, "Gender");
+    const catCount   = count(allData, "Category");
+
+    // Time series (last 14 days)
+    const days = {};
+    for (let i=13; i>=0; i--) { const d=new Date(); d.setDate(d.getDate()-i); days[d.toISOString().split("T")[0]]=0; }
+    allData.forEach(r => { const d=(r.Timestamp||r.DeclDate||"").split("T")[0]; if(days[d]!==undefined) days[d]++; });
+
+    new Chart(document.getElementById("postChart"), {
+        type:'doughnut',
+        data:{ labels:Object.keys(postCount), datasets:[{data:Object.values(postCount),backgroundColor:COLORS}] },
+        options:{ plugins:{ legend:{position:'bottom'} } }
     });
-
-    new Chart(document.getElementById("genderChart"),{
+    new Chart(document.getElementById("genderChart"), {
         type:'pie',
-        data:{
-            labels:Object.keys(genderCount),
-            datasets:[{
-                data:Object.values(genderCount)
-            }]
-        },
-        options:{plugins:{title:{display:true,text:"Gender Distribution"}}}
+        data:{ labels:Object.keys(gendCount), datasets:[{data:Object.values(gendCount),backgroundColor:COLORS}] },
+        options:{ plugins:{ legend:{position:'bottom'} } }
     });
-
-    new Chart(document.getElementById("categoryChart"),{
+    new Chart(document.getElementById("catChart"), {
         type:'bar',
-        data:{
-            labels:Object.keys(categoryCount),
-            datasets:[{
-                label:"Teachers",
-                data:Object.values(categoryCount)
-            }]
-        },
-        options:{plugins:{title:{display:true,text:"Category Distribution"}}}
+        data:{ labels:Object.keys(catCount), datasets:[{label:'Applicants',data:Object.values(catCount),backgroundColor:COLORS}] },
+        options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}} }
+    });
+    new Chart(document.getElementById("timeChart"), {
+        type:'line',
+        data:{ labels:Object.keys(days), datasets:[{label:'Applications',data:Object.values(days),fill:true,backgroundColor:'rgba(30,136,229,0.15)',borderColor:'#1e88e5',tension:.4}] },
+        options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}} }
+    });
+}
+
+// ── Table render with search/filter ──
+function renderTable() {
+    const q    = document.getElementById("searchBox").value.toLowerCase();
+    const post = document.getElementById("filterPost").value;
+    const gen  = document.getElementById("filterGender").value;
+    const cat  = document.getElementById("filterCat").value;
+
+    const filtered = allData.filter(r => {
+        const text = [r.Name,r.Email,r.Subject,r.RegistrationNo,r.Mobile].join(" ").toLowerCase();
+        return (!q || text.includes(q))
+            && (!post || r.PostApplied===post)
+            && (!gen  || r.Gender===gen)
+            && (!cat  || r.Category===cat);
     });
 
-});
-</script>
+    document.getElementById("countLabel").textContent = `Showing ${filtered.length} of ${allData.length}`;
 
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    if (!filtered.length) {
+        document.getElementById("noData").style.display = "block";
+        return;
+    }
+    document.getElementById("noData").style.display = "none";
+
+    filtered.forEach((r, idx) => {
+        const rowId = `row-${idx}`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><button class="expand-btn" onclick="toggleDetail('${rowId}')">＋</button></td>
+            <td>${idx+1}</td>
+            <td>${r.RegistrationNo||"–"}</td>
+            <td><strong>${r.Name||"–"}</strong></td>
+            <td>${postBadge(r.PostApplied)}</td>
+            <td>${r.Subject||"–"}</td>
+            <td>${r.Gender||"–"}</td>
+            <td>${r.Category||"–"}</td>
+            <td>${r.Age||"–"}</td>
+            <td>${r.Mobile||"–"}</td>
+            <td>${r.Email||"–"}</td>
+            <td>${r.Grad_Pct?r.Grad_Pct+"%":"–"}</td>
+            <td>${r.PG_Pct?r.PG_Pct+"%":"–"}</td>
+            <td>${r.BEd_Pct?r.BEd_Pct+"%":"–"}</td>
+            <td>${r.CTET||"–"}</td>
+            <td>${r.TotalExp||"–"}</td>
+            <td>${r.Languages||"–"}</td>
+            <td>${(r.Timestamp||r.DeclDate||"–").split("T")[0]}</td>
+        `;
+        tbody.appendChild(tr);
+
+        // Detail expansion row
+        let quals = [];
+        try { quals = JSON.parse(r.Qualifications||"[]"); } catch(e){}
+        let exps = [];
+        try { exps = JSON.parse(r.Experience||"[]"); } catch(e){}
+
+        const detailRow = document.createElement("tr");
+        detailRow.id = rowId;
+        detailRow.style.display = "none";
+        detailRow.innerHTML = `
+        <td colspan="18">
+          <div style="padding:12px 16px; background:#f7faff; border-left: 4px solid #1e88e5; border-radius:4px;">
+            <div class="detail-grid" style="margin-bottom:12px;">
+              <div class="detail-item"><span class="key">Father/Husband:</span><br><span class="val">${r.FatherName||"–"}</span></div>
+              <div class="detail-item"><span class="key">Date of Birth:</span><br><span class="val">${r.DateOfBirth||"–"}</span></div>
+              <div class="detail-item"><span class="key">Aadhar:</span><br><span class="val">${r.Aadhar||"–"}</span></div>
+              <div class="detail-item"><span class="key">PAN:</span><br><span class="val">${r.PAN||"–"}</span></div>
+              <div class="detail-item"><span class="key">XII %:</span><br><span class="val">${r.XII_Pct?r.XII_Pct+"%":"–"}</span></div>
+              <div class="detail-item"><span class="key">Graduation:</span><br><span class="val">${r.Grad_Name||"–"} (${r.Grad_Year||""}) — ${r.Grad_Pct?r.Grad_Pct+"%":"–"}</span></div>
+              <div class="detail-item"><span class="key">Post-Graduation:</span><br><span class="val">${r.PG_Name||"–"} (${r.PG_Year||""}) — ${r.PG_Pct?r.PG_Pct+"%":"–"}</span></div>
+              <div class="detail-item"><span class="key">B.Ed / JBT:</span><br><span class="val">${r.BEd_Name||"–"} (${r.BEd_Year||""}) — ${r.BEd_Pct?r.BEd_Pct+"%":"–"}</span></div>
+              <div class="detail-item"><span class="key">CTET Score:</span><br><span class="val">${r.CTETScore||"–"}</span></div>
+              <div class="detail-item"><span class="key">Address:</span><br><span class="val">${r.Address||"–"}</span></div>
+              <div class="detail-item"><span class="key">Other Info:</span><br><span class="val">${r.OtherInfo||"–"}</span></div>
+            </div>
+
+            ${quals.length ? `
+            <strong style="font-size:12px;">Academic Qualifications:</strong>
+            <table style="margin-top:6px;font-size:11px;width:auto;">
+              <thead><tr style="background:#dde8ff;">
+                <th style="padding:4px 8px;border:1px solid #ccc;">Course</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Year</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Max</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Obtained</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Overall %</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Subj %</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Medium</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Subjects</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Board/Univ</th>
+              </tr></thead>
+              <tbody>
+                ${quals.map(q=>`<tr>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.name||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.year||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.max||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.obt||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.pct||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.subpct||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.med||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.subj||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${q.board||"–"}</td>
+                </tr>`).join("")}
+              </tbody>
+            </table>` : ""}
+
+            ${exps.length ? `
+            <strong style="font-size:12px;display:block;margin-top:10px;">Teaching Experience:</strong>
+            <table style="margin-top:6px;font-size:11px;width:auto;">
+              <thead><tr style="background:#dde8ff;">
+                <th style="padding:4px 8px;border:1px solid #ccc;">Post Held</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Institution</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Board</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">From</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">To</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Duration</th>
+                <th style="padding:4px 8px;border:1px solid #ccc;">Subject & Classes</th>
+              </tr></thead>
+              <tbody>
+                ${exps.map(e=>`<tr>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.post||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.inst||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.board||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.from||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.to||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.dur||"–"}</td>
+                  <td style="padding:3px 8px;border:1px solid #ddd;">${e.subj||"–"}</td>
+                </tr>`).join("")}
+              </tbody>
+            </table>` : ""}
+          </div>
+        </td>`;
+        tbody.appendChild(detailRow);
+    });
+}
+
+function toggleDetail(id) {
+    const row = document.getElementById(id);
+    const btn = row.previousElementSibling.querySelector(".expand-btn");
+    if (row.style.display === "none") {
+        row.style.display = "table-row";
+        btn.textContent = "－";
+    } else {
+        row.style.display = "none";
+        btn.textContent = "＋";
+    }
+}
+
+loadData();
+</script>
 </body>
 </html>

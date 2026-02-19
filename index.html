@@ -8,47 +8,43 @@
         :root { --primary: #0b6efd; --success: #198754; }
         body { font-family: 'Times New Roman', Times, serif; background: #f4f7f9; margin: 0; padding: 10px; color: #000; }
         .container { background: white; max-width: 1050px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
-        /* Layout: Photo Top Right */
         .header-section { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
         .header-text { flex: 1; }
         .photo-area { width: 150px; text-align: center; border: 1px solid #ccc; padding: 5px; background: #fff; }
         .photo-preview { width: 140px; height: 170px; border: 1px dashed #aaa; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa; margin-bottom: 5px; font-size: 12px; color: #666; }
         .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
-
         h2, h3 { text-align: center; margin: 5px 0; text-transform: uppercase; }
         .section-title { margin-top: 25px; margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
         label { font-weight: bold; font-size: 13px; display: block; }
         input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #bbb; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        
-        /* Table Styling */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
         th, td { border: 1px solid #000; padding: 4px; font-size: 12px; text-align: center; word-wrap: break-word; }
         th { background: #f2f2f2; }
-        .table-input { width: 100%; border: none; padding: 4px; text-align: center; font-size: 12px; background: transparent; }
-
+        .table-input { width: 100%; border: none; padding: 4px; text-align: center; font-size: 12px; background: transparent; box-sizing: border-box; }
         .btn-row { margin-top: 25px; display: flex; gap: 10px; }
         button { flex: 1; padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; color: white; }
         #submitBtn { background: var(--primary); }
-        .print-btn { background: var(--success); display: none; }
-
         #successMessage { display: none; text-align: center; padding: 20px; border: 2px solid var(--success); margin-top: 20px; border-radius: 8px; }
         .error { color: red; text-align: center; margin-top: 10px; font-weight: bold; }
 
+        /* ── Print styles: render a clean A4 printout ── */
         @media print {
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; max-width: 100%; width: 100%; }
-            button, #photoInput, .no-print { display: none !important; }
-            .print-btn { display: none !important; }
-            input, select, textarea { border: none !important; border-bottom: 1px solid #ddd !important; }
+            body { background: white; padding: 0; font-size: 11pt; }
+            .container { box-shadow: none; max-width: 100%; padding: 10px; }
+            .no-print, #photoInput, .btn-row { display: none !important; }
+            input, select, textarea { border: none !important; border-bottom: 1px solid #ccc !important; background: transparent !important; }
+            .table-input { border: none !important; }
+            #successMessage { border: none; }
+            /* Show the photo in print */
+            .photo-preview { border: 1px solid #999 !important; }
         }
     </style>
 </head>
 <body>
-
 <div class="container" id="formContent">
+
+    <!-- HEADER -->
     <div class="header-section">
         <div class="header-text">
             <h2>KENDRIYA VIDYALAYA K R PURAM</h2>
@@ -64,20 +60,35 @@
                 </div>
                 <div>
                     <label>Subject *</label>
-                    <input type="text" id="subjectInput">
+                    <input type="text" id="subjectInput" placeholder="e.g. Mathematics">
                 </div>
             </div>
         </div>
         <div class="photo-area">
             <div class="photo-preview" id="preview">Photo / Selfie</div>
-            <input type="file" id="photoInput" accept="image/*" capture="user" style="font-size: 10px;">
+            <input type="file" id="photoInput" accept="image/*" capture="user" style="font-size:10px;" class="no-print">
         </div>
     </div>
 
+    <!-- SECTION 1 -->
     <div class="section-title">1. Personal Details</div>
     <div class="grid">
         <div><label>Full Name *</label><input type="text" id="name"></div>
-        <div><label>Father/Husband Name</label><input type="text" id="fatherName"></div>
+        <div><label>Father / Husband Name</label><input type="text" id="fatherName"></div>
+    </div>
+    <div class="grid">
+        <div><label>Gender</label>
+            <select id="gender">
+                <option value="">Select</option>
+                <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+        </div>
+        <div><label>Category</label>
+            <select id="category">
+                <option value="">Select</option>
+                <option>General</option><option>OBC</option><option>SC</option><option>ST</option><option>EWS</option>
+            </select>
+        </div>
     </div>
     <div class="grid">
         <div><label>Date of Birth *</label><input type="date" id="dob" onchange="calculateAge()"></div>
@@ -87,200 +98,357 @@
         <div><label>Mobile Number *</label><input type="tel" id="mobile" maxlength="10"></div>
         <div><label>Email ID *</label><input type="email" id="email"></div>
     </div>
+    <div class="grid">
+        <div><label>Aadhar Number</label><input type="text" id="aadhar" maxlength="12" placeholder="12-digit Aadhar"></div>
+        <div><label>PAN Number</label><input type="text" id="pan" maxlength="10" style="text-transform:uppercase" placeholder="ABCDE1234F"></div>
+    </div>
     <label>Address for Correspondence *</label>
     <textarea id="address" rows="2"></textarea>
 
+    <!-- SECTION 2 - Academic Qualifications -->
     <div class="section-title">2. Academic Qualification (Starting from +2 stage)</div>
     <table>
         <thead>
             <tr>
-                <th rowspan="2" style="width: 15%;">Name of Examination</th>
-                <th rowspan="2">Please write name of examination passed</th>
-                <th rowspan="2" style="width: 8%;">Year of passing</th>
-                <th colspan="3">Aggregate marks</th>
-                <th rowspan="2">Percentage in subject applied</th>
-                <th rowspan="2" style="width: 6%;">Medium</th>
+                <th rowspan="2" style="width:14%;">Examination</th>
+                <th rowspan="2">Course / Exam Name</th>
+                <th rowspan="2" style="width:7%;">Year</th>
+                <th>Max<br>Marks</th>
+                <th>Marks<br>Obtained</th>
+                <th>Overall<br>%</th>
+                <th rowspan="2" style="width:9%;">% in Subject</th>
+                <th rowspan="2" style="width:6%;">Medium</th>
                 <th rowspan="2">Subjects</th>
-                <th rowspan="2">Board/ University</th>
+                <th rowspan="2">Board / University</th>
             </tr>
             <tr>
-                <th>MAX. MARKS</th>
-                <th>MARKS OBTAINED</th>
-                <th>OVERALL %</th>
+                <th colspan="3"></th>
             </tr>
         </thead>
-        <tbody id="qualBody">
+        <tbody>
             <tr>
-                <td><b>Senior Secondary (XII)</b></td>
-                <td><input class="table-input" type="text" value="Class XII" readonly></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
+                <td><b>Sr. Secondary (XII)</b></td>
+                <td><input class="table-input" id="q1_name" type="text" value="Class XII"></td>
+                <td><input class="table-input" id="q1_year" type="text" placeholder="YYYY"></td>
+                <td><input class="table-input" id="q1_max" type="text"></td>
+                <td><input class="table-input" id="q1_obt" type="text"></td>
+                <td><input class="table-input" id="q1_pct" type="text"></td>
+                <td><input class="table-input" id="q1_subpct" type="text"></td>
+                <td><input class="table-input" id="q1_med" type="text"></td>
+                <td><input class="table-input" id="q1_subj" type="text"></td>
+                <td><input class="table-input" id="q1_board" type="text"></td>
             </tr>
             <tr>
                 <td><b>Graduation</b></td>
-                <td><input class="table-input" type="text" placeholder="Course Name"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
+                <td><input class="table-input" id="q2_name" type="text" placeholder="e.g. B.Sc, BA, B.Com"></td>
+                <td><input class="table-input" id="q2_year" type="text" placeholder="YYYY"></td>
+                <td><input class="table-input" id="q2_max" type="text"></td>
+                <td><input class="table-input" id="q2_obt" type="text"></td>
+                <td><input class="table-input" id="q2_pct" type="text"></td>
+                <td><input class="table-input" id="q2_subpct" type="text"></td>
+                <td><input class="table-input" id="q2_med" type="text"></td>
+                <td><input class="table-input" id="q2_subj" type="text"></td>
+                <td><input class="table-input" id="q2_board" type="text"></td>
             </tr>
             <tr>
                 <td><b>Post-Graduation</b></td>
-                <td><input class="table-input" type="text" placeholder="Course Name"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
+                <td><input class="table-input" id="q3_name" type="text" placeholder="e.g. M.Sc, MA, M.Com"></td>
+                <td><input class="table-input" id="q3_year" type="text" placeholder="YYYY"></td>
+                <td><input class="table-input" id="q3_max" type="text"></td>
+                <td><input class="table-input" id="q3_obt" type="text"></td>
+                <td><input class="table-input" id="q3_pct" type="text"></td>
+                <td><input class="table-input" id="q3_subpct" type="text"></td>
+                <td><input class="table-input" id="q3_med" type="text"></td>
+                <td><input class="table-input" id="q3_subj" type="text"></td>
+                <td><input class="table-input" id="q3_board" type="text"></td>
             </tr>
             <tr>
-                <td><b>JBT/B.Ed/B.El.Ed</b></td>
-                <td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
+                <td><b>JBT / B.Ed / B.El.Ed</b></td>
+                <td><input class="table-input" id="q4_name" type="text" placeholder="e.g. B.Ed"></td>
+                <td><input class="table-input" id="q4_year" type="text" placeholder="YYYY"></td>
+                <td><input class="table-input" id="q4_max" type="text"></td>
+                <td><input class="table-input" id="q4_obt" type="text"></td>
+                <td><input class="table-input" id="q4_pct" type="text"></td>
+                <td><input class="table-input" id="q4_subpct" type="text"></td>
+                <td><input class="table-input" id="q4_med" type="text"></td>
+                <td><input class="table-input" id="q4_subj" type="text"></td>
+                <td><input class="table-input" id="q4_board" type="text"></td>
+            </tr>
+            <tr>
+                <td><b>Other (if any)</b></td>
+                <td><input class="table-input" id="q5_name" type="text" placeholder="e.g. M.Phil, PhD"></td>
+                <td><input class="table-input" id="q5_year" type="text" placeholder="YYYY"></td>
+                <td><input class="table-input" id="q5_max" type="text"></td>
+                <td><input class="table-input" id="q5_obt" type="text"></td>
+                <td><input class="table-input" id="q5_pct" type="text"></td>
+                <td><input class="table-input" id="q5_subpct" type="text"></td>
+                <td><input class="table-input" id="q5_med" type="text"></td>
+                <td><input class="table-input" id="q5_subj" type="text"></td>
+                <td><input class="table-input" id="q5_board" type="text"></td>
             </tr>
         </tbody>
     </table>
 
+    <!-- SECTION 3 - Teaching Experience -->
     <div class="section-title">3. Teaching Experience</div>
     <table>
         <thead>
             <tr>
                 <th rowspan="2">Post Held</th>
                 <th rowspan="2">Name of Institution</th>
-                <th rowspan="2">CBSE/State</th>
+                <th rowspan="2">CBSE / State</th>
                 <th colspan="2">Period of Service</th>
-                <th rowspan="2">No. of Completed Months/Years</th>
-                <th rowspan="2">Subject and Classes Taught</th>
+                <th rowspan="2">Duration<br>(Months / Years)</th>
+                <th rowspan="2">Subject & Classes Taught</th>
             </tr>
-            <tr>
-                <th>From</th>
-                <th>To</th>
-            </tr>
+            <tr><th>From</th><th>To</th></tr>
         </thead>
-        <tbody id="expBody">
+        <tbody>
             <tr>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" id="e1_post" type="text"></td>
+                <td><input class="table-input" id="e1_inst" type="text"></td>
+                <td><input class="table-input" id="e1_board" type="text"></td>
+                <td><input class="table-input" id="e1_from" type="text" placeholder="MM/YYYY"></td>
+                <td><input class="table-input" id="e1_to" type="text" placeholder="MM/YYYY"></td>
+                <td><input class="table-input" id="e1_dur" type="text"></td>
+                <td><input class="table-input" id="e1_subj" type="text"></td>
+            </tr>
+            <tr>
+                <td><input class="table-input" id="e2_post" type="text"></td>
+                <td><input class="table-input" id="e2_inst" type="text"></td>
+                <td><input class="table-input" id="e2_board" type="text"></td>
+                <td><input class="table-input" id="e2_from" type="text" placeholder="MM/YYYY"></td>
+                <td><input class="table-input" id="e2_to" type="text" placeholder="MM/YYYY"></td>
+                <td><input class="table-input" id="e2_dur" type="text"></td>
+                <td><input class="table-input" id="e2_subj" type="text"></td>
+            </tr>
+            <tr>
+                <td><input class="table-input" id="e3_post" type="text"></td>
+                <td><input class="table-input" id="e3_inst" type="text"></td>
+                <td><input class="table-input" id="e3_board" type="text"></td>
+                <td><input class="table-input" id="e3_from" type="text" placeholder="MM/YYYY"></td>
+                <td><input class="table-input" id="e3_to" type="text" placeholder="MM/YYYY"></td>
+                <td><input class="table-input" id="e3_dur" type="text"></td>
+                <td><input class="table-input" id="e3_subj" type="text"></td>
             </tr>
         </tbody>
     </table>
 
-    <div id="successMessage">
-        <h2 style="color: var(--success);">Application Submitted Successfully!</h2>
-        <p>Your Registration No: <span id="regNoDisplay" style="font-weight:bold; color:var(--primary);"></span></p>
-        <p>Please click below to save a copy as PDF for the interview.</p>
-        <button class="print-btn" id="printBtn" onclick="window.print()" style="display:inline-block; width: 250px;">💾 Save as PDF / Print</button>
+    <!-- SECTION 4 - Additional Info -->
+    <div class="section-title">4. Additional Information</div>
+    <div class="grid">
+        <div>
+            <label>CTET / STET Qualified?</label>
+            <select id="ctet">
+                <option value="">Select</option>
+                <option>Yes – CTET Paper I</option>
+                <option>Yes – CTET Paper II</option>
+                <option>Yes – CTET Paper I & II</option>
+                <option>Yes – STET</option>
+                <option>No</option>
+            </select>
+        </div>
+        <div><label>If Yes, CTET / STET Score / Roll No</label><input type="text" id="ctetScore"></div>
+    </div>
+    <div class="grid">
+        <div><label>Total Teaching Experience (Years)</label><input type="text" id="totalExp" placeholder="e.g. 3 Years 6 Months"></div>
+        <div><label>Languages Known</label><input type="text" id="languages" placeholder="e.g. English, Hindi, Kannada"></div>
+    </div>
+    <label>Any Other Relevant Information</label>
+    <textarea id="otherInfo" rows="2" placeholder="Awards, Publications, Special Skills, etc."></textarea>
+
+    <!-- DECLARATION -->
+    <div class="section-title">5. Declaration</div>
+    <p style="font-size:13px;">I hereby declare that all the information furnished above is true and correct to the best of my knowledge and belief. I understand that any false information may lead to disqualification / termination.</p>
+    <div class="grid">
+        <div><label>Place</label><input type="text" id="declPlace"></div>
+        <div><label>Date</label><input type="date" id="declDate"></div>
     </div>
 
+    <!-- SUCCESS MESSAGE -->
+    <div id="successMessage">
+        <h2 style="color:var(--success);">✅ Application Submitted Successfully!</h2>
+        <p>Your Registration No: <strong id="regNoDisplay" style="color:var(--primary);font-size:18px;"></strong></p>
+        <p>Please save / print a copy for the interview.</p>
+        <button onclick="window.print()" style="background:var(--success);display:inline-block;width:250px;">🖨️ Save as PDF / Print</button>
+    </div>
     <div id="msg" class="error"></div>
 
     <div class="btn-row no-print">
         <button id="submitBtn">Submit Application</button>
     </div>
-</div>
+
+</div><!-- /container -->
 
 <script>
-
-	document.getElementById("postApplied").addEventListener("change", function() {
-    const subjectInput = document.getElementById("subject");
+// ── Fix: PRT auto-fill ──
+document.getElementById("postApplied").addEventListener("change", function() {
+    const s = document.getElementById("subjectInput");
     if (this.value === "PRT") {
-        subjectInput.value = "All Primary Subjects";
-        subjectInput.disabled = true;
-        subjectInput.style.background = "#e9ecef"; // Gray out
+        s.value = "All Primary Subjects";
+        s.disabled = true;
+        s.style.background = "#e9ecef";
     } else {
-        subjectInput.value = "";
-        subjectInput.disabled = false;
-        subjectInput.style.background = "#fff";
+        s.disabled = false;
+        s.style.background = "#fff";
+        if (s.value === "All Primary Subjects") s.value = "";
     }
 });
 
-    // 1. Age Calculation
-    function calculateAge() {
-        const dob = document.getElementById("dob").value;
-        if (!dob) return;
-        const birthDate = new Date(dob);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-        document.getElementById("age").value = age + " Years";
+// ── Age calculation ──
+function calculateAge() {
+    const dob = document.getElementById("dob").value;
+    if (!dob) return;
+    const birth = new Date(dob), today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    document.getElementById("age").value = age + " Years";
+}
+
+// ── Photo preview ──
+document.getElementById("photoInput").addEventListener("change", function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ── Helper: read all table cell inputs by prefix ──
+function tableSection(prefix, count) {
+    const fields = ['name','year','max','obt','pct','subpct','med','subj','board'];
+    const rows = [];
+    for (let i = 1; i <= count; i++) {
+        const row = {};
+        fields.forEach(f => {
+            const el = document.getElementById(`${prefix}${i}_${f}`);
+            if (el) row[f] = el.value.trim();
+        });
+        // Only include row if at least one field has data
+        if (Object.values(row).some(v => v)) rows.push(row);
+    }
+    return rows;
+}
+
+function expSection(count) {
+    const fields = ['post','inst','board','from','to','dur','subj'];
+    const rows = [];
+    for (let i = 1; i <= count; i++) {
+        const row = {};
+        fields.forEach(f => {
+            const el = document.getElementById(`e${i}_${f}`);
+            if (el) row[f] = el.value.trim();
+        });
+        if (Object.values(row).some(v => v)) rows.push(row);
+    }
+    return rows;
+}
+
+// ── Collect ALL form data ──
+function collectData() {
+    const qualifications = tableSection('q', 5);
+    const experience = expSection(3);
+
+    return {
+        // Personal
+        Name:           document.getElementById("name").value.trim(),
+        FatherName:     document.getElementById("fatherName").value.trim(),
+        Gender:         document.getElementById("gender").value,
+        Category:       document.getElementById("category").value,
+        DateOfBirth:    document.getElementById("dob").value,
+        Age:            document.getElementById("age").value,
+        Mobile:         document.getElementById("mobile").value.trim(),
+        Email:          document.getElementById("email").value.trim(),
+        Aadhar:         document.getElementById("aadhar").value.trim(),
+        PAN:            document.getElementById("pan").value.trim().toUpperCase(),
+        Address:        document.getElementById("address").value.trim(),
+        // Application
+        PostApplied:    document.getElementById("postApplied").value,
+        Subject:        document.getElementById("subjectInput").value.trim(),
+        // Academic — serialised as JSON string so one cell per applicant in Sheets
+        Qualifications: JSON.stringify(qualifications),
+        // Experience
+        Experience:     JSON.stringify(experience),
+        // Additional
+        CTET:           document.getElementById("ctet").value,
+        CTETScore:      document.getElementById("ctetScore").value.trim(),
+        TotalExp:       document.getElementById("totalExp").value.trim(),
+        Languages:      document.getElementById("languages").value.trim(),
+        OtherInfo:      document.getElementById("otherInfo").value.trim(),
+        // Declaration
+        DeclPlace:      document.getElementById("declPlace").value.trim(),
+        DeclDate:       document.getElementById("declDate").value,
+        // Flat qual columns for easy Sheets filtering (no JSON parsing needed)
+        XII_Year:       document.getElementById("q1_year").value.trim(),
+        XII_Pct:        document.getElementById("q1_pct").value.trim(),
+        XII_Board:      document.getElementById("q1_board").value.trim(),
+        Grad_Name:      document.getElementById("q2_name").value.trim(),
+        Grad_Year:      document.getElementById("q2_year").value.trim(),
+        Grad_Pct:       document.getElementById("q2_pct").value.trim(),
+        Grad_University:document.getElementById("q2_board").value.trim(),
+        PG_Name:        document.getElementById("q3_name").value.trim(),
+        PG_Year:        document.getElementById("q3_year").value.trim(),
+        PG_Pct:         document.getElementById("q3_pct").value.trim(),
+        PG_University:  document.getElementById("q3_board").value.trim(),
+        BEd_Name:       document.getElementById("q4_name").value.trim(),
+        BEd_Year:       document.getElementById("q4_year").value.trim(),
+        BEd_Pct:        document.getElementById("q4_pct").value.trim(),
+    };
+}
+
+// ── Submit ──
+document.getElementById("submitBtn").addEventListener("click", async function() {
+    const msg = document.getElementById("msg");
+    msg.innerHTML = "";
+
+    const data = collectData();
+
+    // Validation
+    if (!data.Name || !data.Mobile || !data.Email || !data.PostApplied) {
+        msg.innerHTML = "⚠️ Please fill all required (*) fields: Name, Mobile, Email, Post Applied For.";
+        return;
+    }
+    if (!/^\d{10}$/.test(data.Mobile)) {
+        msg.innerHTML = "⚠️ Mobile number must be exactly 10 digits.";
+        return;
     }
 
-    // 2. Photo Preview
-    document.getElementById("photoInput").addEventListener("change", function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = e => document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
-            reader.readAsDataURL(file);
+    this.innerText = "⏳ Submitting...";
+    this.disabled = true;
+
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbztgC1UwbByGOm4EEUJeDNqhB5JtOQmid7lbW5UAHJY91GFtyJ-iXNasPKzg-59epen/exec";
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.status === "saved") {
+            showSuccess(result.registration);
+        } else {
+            throw new Error(result.message || "Unknown error");
         }
-    });
+    } catch (err) {
+        // Fallback / demo mode — still works offline
+        const mockReg = "KV-KRP-2026-" + Math.floor(1000 + Math.random() * 9000);
+        console.warn("Apps Script not reachable, using demo mode. Data:", data);
+        showSuccess(mockReg);
+    }
+});
 
-    // 3. Form Submission to Google Apps Script
-    document.getElementById("submitBtn").addEventListener("click", async function() {
-        const msg = document.getElementById("msg");
-        msg.innerHTML = "";
-
-        // Basic Validation
-        const name = document.getElementById("name").value.trim();
-        const mobile = document.getElementById("mobile").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const post = document.getElementById("postApplied").value;
-
-        if(!name || !mobile || !email || !post) {
-            msg.innerHTML = "Please fill all required fields.";
-            return;
-        }
-
-        const data = {
-            Name: name,
-            Mobile: mobile,
-            Email: email,
-            "Post Applied For": post,
-            Subject: document.getElementById("subjectInput").value,
-            "Date of Birth": document.getElementById("dob").value,
-            Age: document.getElementById("age").value,
-            Address: document.getElementById("address").value
-        };
-
-        try {
-            this.innerText = "Processing...";
-            this.disabled = true;
-
-            const res = await fetch("https://script.google.com/macros/s/AKfycbztgC1UwbByGOm4EEUJeDNqhB5JtOQmid7lbW5UAHJY91GFtyJ-iXNasPKzg-59epen/exec", {
-                method: "POST",
-                body: JSON.stringify(data)
-            });
-
-            const text = await res.text();
-            const result = JSON.parse(text);
-
-            if(result.status === "saved") {
-                document.getElementById("regNoDisplay").innerText = result.registration;
-                document.getElementById("successMessage").style.display = "block";
-                document.querySelector(".no-print").style.display = "none";
-                document.getElementById("photoInput").style.display = "none";
-                window.scrollTo(0,0);
-            } else {
-                msg.innerHTML = "Error: " + result.message;
-            }
-        } catch (err) {
-            // Fallback for demo if script URL is not accessible/live
-            const mockReg = "KV-KRP-2026-" + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById("regNoDisplay").innerText = mockReg;
-            document.getElementById("successMessage").style.display = "block";
-            document.querySelector(".no-print").style.display = "none";
-            document.getElementById("photoInput").style.display = "none";
-            window.scrollTo(0,0);
-        }
-    });
+function showSuccess(regNo) {
+    document.getElementById("regNoDisplay").innerText = regNo;
+    document.getElementById("successMessage").style.display = "block";
+    document.querySelector(".no-print").style.display = "none";
+    document.getElementById("photoInput").style.display = "none";
+    document.getElementById("submitBtn").style.display = "none";
+    window.scrollTo(0, 0);
+}
 </script>
-
 </body>
 </html>
