@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KV Teacher Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{
+            font-family: Arial;
+            background:#f4f6fa;
+            text-align:center;
+        }
+        .box{
+            width:90%;
+            margin:auto;
+        }
+        canvas{
+            background:white;
+            padding:20px;
+            margin:20px;
+            border-radius:10px;
+        }
+        .download{
+            margin:20px;
+            padding:12px 25px;
+            background:#1e88e5;
+            color:white;
+            text-decoration:none;
+            border-radius:6px;
+            display:inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<h1>KV Teacher Application Dashboard</h1>
+
+<a class="download" href="https://kv-teacher-form.onrender.com/download">
+Download Excel
+</a>
+
+<div class="box">
+    <canvas id="genderChart"></canvas>
+    <canvas id="categoryChart"></canvas>
+</div>
+
+<script>
+fetch("https://kv-teacher-form.onrender.com/data")
+.then(res => res.json())
+.then(data => {
+
+    let genderCount = {};
+    let categoryCount = {};
+
+    data.forEach(row=>{
+        let g = row.Gender || "Unknown";
+        let c = row.Category || "Unknown";
+
+        genderCount[g] = (genderCount[g]||0)+1;
+        categoryCount[c] = (categoryCount[c]||0)+1;
+    });
+
+    new Chart(document.getElementById("genderChart"),{
+        type:'pie',
+        data:{
+            labels:Object.keys(genderCount),
+            datasets:[{
+                data:Object.values(genderCount)
+            }]
+        },
+        options:{plugins:{title:{display:true,text:"Gender Distribution"}}}
+    });
+
+    new Chart(document.getElementById("categoryChart"),{
+        type:'bar',
+        data:{
+            labels:Object.keys(categoryCount),
+            datasets:[{
+                label:"Teachers",
+                data:Object.values(categoryCount)
+            }]
+        },
+        options:{plugins:{title:{display:true,text:"Category Distribution"}}}
+    });
+
+});
+</script>
+
+</body>
+</html>
