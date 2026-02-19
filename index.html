@@ -129,33 +129,42 @@ else{lbl.innerText='Subject';inp.placeholder='';}
 }
 </script>
 <script>
-document.getElementById("submitForm").addEventListener("click", function(e){
+<script>
+document.getElementById("submitForm").addEventListener("click", async function(e){
     e.preventDefault();
 
-    let data = {};
+    // Map exact fields needed by backend
+    const data = {
+        "Name": document.querySelector("input[type=text]").value,
+        "Email": document.querySelector("input[type=email]").value,
+        "Mobile": document.querySelector("input[type=tel]").value,
+        "Date of Birth": document.querySelector("input[type=date]").value,
+        "Post Applied For": document.getElementById("postApplied").value,
+        "Subject": document.getElementById("subjectInput").value,
+        "Address": document.querySelector("textarea").value,
+        "Registration No": "TEMP-" + Date.now()   // temporary until we generate real reg no
+    };
 
-    document.querySelectorAll("input, select, textarea").forEach(el=>{
-        if(el.type !== "file"){
-            let label = el.closest("div")?.querySelector("label");
-            let key = label ? label.innerText : el.name || "field";
-            data[key] = el.value;
+    try{
+        const res = await fetch("https://kv-teacher-form.onrender.com/submit",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if(result.status==="saved"){
+            alert("Saved to Google Sheet!");
+        }else{
+            alert("Server error: "+JSON.stringify(result));
         }
-    });
 
-    fetch("https://kv-teacher-form.onrender.com/submit",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(data)
-    })
-    .then(res=>res.json())
-    .then(()=>{
-        alert("Form saved to database!");
-        window.print();
-    })
-    .catch(()=>{
-        alert("Server connection failed");
-    });
+    }catch(err){
+        alert("Cannot reach server");
+    }
 });
+</script>
 </script>
 
 
