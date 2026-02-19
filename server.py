@@ -1,91 +1,91 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
+import json
+import base64
+import io
 from datetime import datetime
 
-print("KV GOOGLE SHEET SERVER STARTING")
+print("KV TEACHER FORM SERVER STARTING")
+
 app = Flask(__name__)
 CORS(app)
 
 SHEET_NAME = "KV_Teacher_Data"
-CREDS_FILE  = "creds.json"
 
-# ── All columns in exact order ──────────────────────────────────────────────
 COLUMNS = [
-    "Timestamp",
-    "RegistrationNo",
-    "Name",
-    "FatherName",
-    "Gender",
-    "Category",
-    "DateOfBirth",
-    "Age",
-    "Mobile",
-    "Email",
-    "Aadhar",
-    "PAN",
-    "Address",
-    "PostApplied",
-    "Subject",
-    # Flat qualification columns (easy to filter in Sheets)
-    "XII_Year",
-    "XII_Pct",
-    "XII_Board",
-    "Grad_Name",
-    "Grad_Year",
-    "Grad_Pct",
-    "Grad_University",
-    "PG_Name",
-    "PG_Year",
-    "PG_Pct",
-    "PG_University",
-    "BEd_Name",
-    "BEd_Year",
-    "BEd_Pct",
-    # Additional info
-    "CTET",
-    "CTETScore",
-    "TotalExp",
-    "Languages",
-    "OtherInfo",
-    # Declaration
-    "DeclPlace",
-    "DeclDate",
-    # Full structured data as JSON strings
-    "Qualifications",
-    "Experience",
+    "Timestamp", "RegistrationNo", "Name", "FatherName", "Gender", "Category",
+    "DateOfBirth", "Age", "Mobile", "Email", "Aadhar", "PAN", "Address",
+    "PostApplied", "Subject",
+    "XII_Year", "XII_Pct", "XII_Board",
+    "Grad_Name", "Grad_Year", "Grad_Pct", "Grad_University",
+    "PG_Name", "PG_Year", "PG_Pct", "PG_University",
+    "BEd_Name", "BEd_Year", "BEd_Pct",
+    "CTET", "CTETScore", "TotalExp", "Languages", "OtherInfo",
+    "DeclPlace", "DeclDate", "Qualifications", "Experience",
 ]
 
-# ── Sheet connection ────────────────────────────────────────────────────────
+
 def connect_sheet():
     try:
         scope = [
             "https://spreadsheets.google.com/feeds",
             "https://www.googleapis.com/auth/drive"
         ]
-        creds  = ServiceAccountCredentials.from_json_keyfile_name(CREDS_FILE, scope)
+
+        creds = None
+
+        # Option 1: Base64-encoded env var (most reliable — no newline corruption)
+        b64 = os.environ.get("GOOGLE_CREDS_B64")
+        if b64:
+            creds_dict = json.loads(base64.b64decode(b64).decode("utf-8"))
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+            print("✅ Creds loaded from GOOGLE_CREDS_B64")
+
+        # Option 2: Raw JSON env var
+        elif os.environ.get("GOOGLE_CREDS_JSON"):
+            creds_dict = json.loads(os.environ.get("GOOGLE_CREDS_JSON"))
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+            print("✅ Creds loaded from GOOGLE_CREDS_JSON")
+
+        # Option 3: Render Secret File
+        elif os.path.exists("/etc/secrets/creds.json"):
+            creds = ServiceAccountCredentials.from_json_keyfile_name("/etc/secrets/creds.json", scope)
+            print("✅ Creds loaded from /etc/secrets/creds.json")
+
+        # Option 4: Local dev
+        elif os.path.exists("creds.json"):
+            creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+            print("✅ Creds loaded from local creds.json")
+
+        else:
+            print("❌ No credentials found.")
+            return None
+
         client = gspread.authorize(creds)
-        sheet  = client.open(SHEET_NAME).sheet1
+        sheet = client.open(SHEET_NAME).sheet1
         print("✅ Connected to Google Sheet:", SHEET_NAME)
 
-        # Write header row if the sheet is empty
-        if sheet.row_count == 0 or sheet.cell(1, 1).value != "Timestamp":
+        # Write header if sheet is empty
+        if not sheet.row_values(1):
             sheet.insert_row(COLUMNS, index=1)
-            print("📝 Header row written.")
+            print("📝 Header row created.")
 
         return sheet
+
     except Exception as e:
         print("❌ SHEET CONNECTION ERROR:", str(e))
         return None
 
+
 sheet = connect_sheet()
 
-# ── Routes ──────────────────────────────────────────────────────────────────
+
 @app.route("/")
 def home():
-    return "KV Teacher Google Sheet Server Running ✅"
+    return "KV Teacher Form Server Running ✅"
 
 
 @app.route("/submit", methods=["POST"])
@@ -94,61 +94,61 @@ def submit():
     try:
         if sheet is None:
             sheet = connect_sheet()
-            if sheet is None:
-                return jsonify({"status": "error", "message": "Cannot connect to Google Sheet"}), 500
+        if sheet is None:
+            return jsonify({"status": "error", "message": "Cannot connect to Google Sheet"}), 500
 
         data = request.get_json(force=True)
+        if not data:
+            return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # Validation
-        for field in ["Name", "Email", "Mobile"]:
-            if not data.get(field):
+        # Validate required fields
+        for field in ["Name", "Mobile", "Email"]:
+            if not data.get(field, "").strip():
                 return jsonify({"status": "error", "message": f"{field} is required"}), 400
 
-        # Unique registration number
         reg_no = "KV-KRP-" + datetime.now().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
-        # Build row in same order as COLUMNS
-        row = [reg_no if col == "RegistrationNo"
-               else datetime.now().strftime("%d-%m-%Y %H:%M:%S") if col == "Timestamp"
-               else data.get(col, "")
-               for col in COLUMNS]
+        row = []
+        for col in COLUMNS:
+            if col == "Timestamp":
+                row.append(timestamp)
+            elif col == "RegistrationNo":
+                row.append(reg_no)
+            else:
+                row.append(data.get(col, ""))
 
         sheet.append_row(row, value_input_option="USER_ENTERED")
-        print(f"✅ Saved: {reg_no} — {data.get('Name')}")
+        print(f"✅ Saved: {reg_no} | {data.get('Name')} | {data.get('PostApplied')}")
 
         return jsonify({"status": "saved", "registration": reg_no})
 
     except Exception as e:
-        print("❌ WRITE FAILED:", str(e))
+        print("❌ SUBMIT ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
 @app.route("/data", methods=["GET"])
 def get_data():
-    """Return all rows as a list of dicts for the dashboard."""
     global sheet
     try:
         if sheet is None:
             sheet = connect_sheet()
-            if sheet is None:
-                return jsonify([])
-
-        records = sheet.get_all_records()   # uses row 1 as keys automatically
+        if sheet is None:
+            return jsonify([])
+        records = sheet.get_all_records()
         return jsonify(records)
-
     except Exception as e:
-        print("❌ READ FAILED:", str(e))
+        print("❌ DATA ERROR:", str(e))
         return jsonify([]), 500
 
 
 @app.route("/download", methods=["GET"])
-def download_excel():
-    """Stream all data as a .xlsx file."""
+def download():
     global sheet
     try:
-        import io
         import openpyxl
-        from flask import send_file
+        from openpyxl.styles import Font, PatternFill, Alignment
 
         if sheet is None:
             sheet = connect_sheet()
@@ -160,25 +160,20 @@ def download_excel():
         ws.title = "Applications"
 
         if records:
-            # Header
             ws.append(list(records[0].keys()))
-            # Data rows
             for rec in records:
                 ws.append(list(rec.values()))
 
-            # Basic formatting
-            from openpyxl.styles import Font, PatternFill, Alignment
-            header_fill = PatternFill("solid", fgColor="0D47A1")
-            header_font = Font(bold=True, color="FFFFFF")
+            # Style header row
             for cell in ws[1]:
-                cell.fill   = header_fill
-                cell.font   = header_font
+                cell.font      = Font(bold=True, color="FFFFFF")
+                cell.fill      = PatternFill("solid", fgColor="0D47A1")
                 cell.alignment = Alignment(horizontal="center")
 
             # Auto column width
             for col in ws.columns:
-                max_len = max((len(str(c.value or "")) for c in col), default=10)
-                ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 50)
+                width = max(len(str(c.value or "")) for c in col)
+                ws.column_dimensions[col[0].column_letter].width = min(width + 4, 50)
 
         buf = io.BytesIO()
         wb.save(buf)
@@ -193,13 +188,12 @@ def download_excel():
         )
 
     except ImportError:
-        return jsonify({"status": "error", "message": "openpyxl not installed. Run: pip install openpyxl"}), 500
+        return jsonify({"status": "error", "message": "Add openpyxl to requirements.txt"}), 500
     except Exception as e:
-        print("❌ DOWNLOAD FAILED:", str(e))
+        print("❌ DOWNLOAD ERROR:", str(e))
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# ── Entry point ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
