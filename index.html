@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KV Contractual Teacher Application</title>
 
-<h2>KENDRIYA VIDYALAYA K R PURAM</h2>
-<h3>PART-TIME CONTRACTUAL TEACHERS FORM</h3>
-
 <style>
 body{font-family:Arial,Helvetica,sans-serif;background:#eef2f5;margin:0}
 .container{background:white;max-width:900px;margin:auto;padding:15px}
@@ -16,21 +13,27 @@ label{font-weight:600}
 input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #bbb;border-radius:6px;font-size:15px;box-sizing:border-box}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #444;padding:6px;font-size:14px;text-align:center}
-button{background:#0b6efd;color:white;border:none;padding:12px;border-radius:8px;width:100%;font-size:16px;margin-top:12px}
+button{background:#0b6efd;color:white;border:none;padding:12px;border-radius:8px;width:100%;font-size:16px;margin-top:12px;cursor:pointer}
 button.small{width:auto;padding:6px 10px;margin:3px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:700px){.grid{grid-template-columns:1fr}th,td{font-size:12px}}
 .photoBox{border:2px dashed #666;padding:15px;text-align:center;border-radius:10px}
+.error{color:red;font-size:14px}
+.success{color:green;font-size:15px;text-align:center;margin-top:10px}
 </style>
 </head>
 
 <body>
 <div class="container">
 
+<h2>KENDRIYA VIDYALAYA K R PURAM</h2>
+<h3>PART-TIME CONTRACTUAL TEACHERS FORM</h3>
+
 <div class="grid">
 <div>
-<label>Post Applied For</label>
-<select id="postApplied">
+<label>Post Applied For *</label>
+<select id="postApplied" required>
+<option value="">Select</option>
 <option>PRT</option>
 <option>TGT</option>
 <option>PGT</option>
@@ -40,29 +43,52 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 </div>
 
 <div>
-<label>Subject</label>
-<input id="subjectInput" type="text">
+<label>Subject *</label>
+<input id="subjectInput" type="text" required>
 </div>
 </div>
 
 <h3>Personal Details</h3>
+
 <div class="grid">
-<div><label>Full Name</label><input id="name" type="text"></div>
-<div><label>Father/Husband Name</label><input type="text"></div>
+<div>
+<label>Full Name *</label>
+<input id="name" type="text" required>
+</div>
+<div>
+<label>Father/Husband Name</label>
+<input type="text">
+</div>
 </div>
 
 <div class="grid">
-<div><label>Date of Birth</label><input id="dob" type="date"></div>
-<div><label>Gender</label><select><option>Male</option><option>Female</option><option>Other</option></select></div>
+<div>
+<label>Date of Birth *</label>
+<input id="dob" type="date" required>
+</div>
+<div>
+<label>Gender</label>
+<select>
+<option>Male</option>
+<option>Female</option>
+<option>Other</option>
+</select>
+</div>
 </div>
 
 <div class="grid">
-<div><label>Mobile</label><input id="mobile" type="tel"></div>
-<div><label>Email</label><input id="email" type="email"></div>
+<div>
+<label>Mobile *</label>
+<input id="mobile" type="tel" pattern="[0-9]{10}" maxlength="10" required>
+</div>
+<div>
+<label>Email *</label>
+<input id="email" type="email" required>
+</div>
 </div>
 
-<label>Address</label>
-<textarea id="address" rows="2"></textarea>
+<label>Address *</label>
+<textarea id="address" rows="2" required></textarea>
 
 <div class="photoBox">
 <b>Take Selfie</b><br>
@@ -71,24 +97,34 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 
 <h3>Teaching Experience</h3>
 <table id="exp">
-<tr><th>Post</th><th>Subject</th><th>Institution</th><th>Board</th><th>From</th><th>To</th><th>Years</th><th>Remove</th></tr>
+<tr>
+<th>Post</th><th>Subject</th><th>Institution</th><th>Board</th>
+<th>From</th><th>To</th><th>Years</th><th>Remove</th>
+</tr>
 </table>
 <button type="button" onclick="addRow()">Add Experience</button>
 
-<h3>Academic Qualification</h3>
-<table id="acad">
-<tr><th>Exam</th><th>Year</th><th>%</th><th>Board/University</th><th>Remove</th></tr>
-<tr><td>Class XII</td><td><input></td><td><input></td><td><input></td><td></td></tr>
-<tr><td>Graduation</td><td><input></td><td><input></td><td><input></td><td></td></tr>
-<tr><td>Post Graduation</td><td><input></td><td><input></td><td><input></td><td></td></tr>
-<tr><td>B.Ed/JBT</td><td><input></td><td><input></td><td><input></td><td></td></tr>
-</table>
-
-<button id="submitForm">Submit / Save PDF</button>
+<button id="submitForm">Submit Application</button>
+<div id="message"></div>
 
 </div>
 
 <script>
+function calculateYears(row){
+    const dates = row.querySelectorAll("input[type='date']");
+    if(dates.length < 2) return;
+
+    const from = dates[0].value;
+    const to = dates[1].value;
+
+    if(from && to){
+        const d1 = new Date(from);
+        const d2 = new Date(to);
+        const years = ((d2 - d1)/(1000*60*60*24*365)).toFixed(1);
+        row.cells[6].innerText = years > 0 ? years : 0;
+    }
+}
+
 function addRow(){
 let t=document.getElementById('exp');
 let r=t.insertRow(-1);
@@ -97,31 +133,48 @@ r.innerHTML=`
 <td><input></td>
 <td><input></td>
 <td><select><option>CBSE</option><option>State</option><option>ICSE</option></select></td>
-<td><input type="date"></td>
-<td><input type="date"></td>
+<td><input type="date" onchange="calculateYears(this.closest('tr'))"></td>
+<td><input type="date" onchange="calculateYears(this.closest('tr'))"></td>
 <td></td>
 <td><button class='small' onclick="this.closest('tr').remove()">X</button></td>`;
 }
-</script>
 
-<!-- 🔥 FIXED SUBMIT SCRIPT -->
-<script>
 document.getElementById("submitForm").addEventListener("click", async function(e){
     e.preventDefault();
 
+    const messageDiv = document.getElementById("message");
+    messageDiv.innerHTML = "";
+
+    const name = document.getElementById("name").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const dob = document.getElementById("dob").value;
+    const post = document.getElementById("postApplied").value;
+    const subject = document.getElementById("subjectInput").value.trim();
+    const address = document.getElementById("address").value.trim();
+
+    if(!name || !mobile || !email || !dob || !post || !subject || !address){
+        messageDiv.innerHTML = "<div class='error'>Please fill all required fields.</div>";
+        return;
+    }
+
+    if(!/^[0-9]{10}$/.test(mobile)){
+        messageDiv.innerHTML = "<div class='error'>Mobile number must be 10 digits.</div>";
+        return;
+    }
+
     const data = {
-        "Name": document.getElementById("name").value,
-        "Email": document.getElementById("email").value,
-        "Mobile": document.getElementById("mobile").value,
-        "Date of Birth": document.getElementById("dob").value,
-        "Post Applied For": document.getElementById("postApplied").value,
-        "Subject": document.getElementById("subjectInput").value,
-        "Address": document.getElementById("address").value,
-        "Registration No": "TEMP-" + Date.now()
+        Name: name,
+        Email: email,
+        Mobile: mobile,
+        "Date of Birth": dob,
+        "Post Applied For": post,
+        Subject: subject,
+        Address: address
     };
 
     try{
-        const res = await fetch("https://kv-teacher-form.onrender.com/submit",{
+        const res = await fetch("https://script.google.com/macros/s/AKfycbztgC1UwbByGOm4EEUJeDNqhB5JtOQmid7lbW5UAHJY91GFtyJ-iXNasPKzg-59epen/exec",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(data)
@@ -129,14 +182,15 @@ document.getElementById("submitForm").addEventListener("click", async function(e
 
         const result = await res.json();
 
-        if(result.status==="saved"){
-            alert("Saved to Google Sheet!");
-        }else{
-            alert("Server error: "+JSON.stringify(result));
+        if(result.status === "saved"){
+            messageDiv.innerHTML = "<div class='success'>Application Submitted Successfully! Registration No: " + result.registration + "</div>";
+            document.querySelector("form")?.reset();
+        } else {
+            messageDiv.innerHTML = "<div class='error'>Error: " + result.message + "</div>";
         }
 
     }catch(err){
-        alert("Cannot reach server");
+        messageDiv.innerHTML = "<div class='error'>Submission failed. Check internet or deployment.</div>";
     }
 });
 </script>

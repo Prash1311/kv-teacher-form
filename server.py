@@ -3,15 +3,13 @@ from flask_cors import CORS
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import os
+from datetime import datetime
 
 print("KV GOOGLE SHEET SERVER STARTING")
 
 app = Flask(__name__)
 CORS(app)
 
-# -----------------------------------
-# Google Sheet Setup
-# -----------------------------------
 SHEET_NAME = "KV_Teacher_Data"
 CREDS_FILE = "creds.json"
 
@@ -35,18 +33,10 @@ def connect_sheet():
 
 sheet = connect_sheet()
 
-
-# -----------------------------------
-# Health check (Render needs this)
-# -----------------------------------
 @app.route("/")
 def home():
     return "KV Teacher Google Sheet Server Running"
 
-
-# -----------------------------------
-# Submit form
-# -----------------------------------
 @app.route("/submit", methods=["POST"])
 def submit():
     global sheet
@@ -56,47 +46,50 @@ def submit():
             sheet = connect_sheet()
             if sheet is None:
                 return jsonify({
-                    "status":"error",
-                    "message":"Cannot connect to Google Sheet (check creds or sharing)"
-                }),500
+                    "status": "error",
+                    "message": "Cannot connect to Google Sheet"
+                }), 500
 
         data = request.get_json(force=True)
-        print("DATA RECEIVED:", data)
 
-        # Required fields mapping
+        # Backend validation
+        required_fields = ["Name", "Email", "Mobile"]
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    "status": "error",
+                    "message": f"{field} is required"
+                }), 400
+
+        # Generate registration number
+        reg_no = "KV-" + datetime.now().strftime("%Y%m%d%H%M%S")
+
         row = [
-            data.get("Name",""),
-            data.get("Email",""),
-            data.get("Mobile",""),
-            data.get("Date of Birth",""),
-            data.get("Post Applied For",""),
-            data.get("Subject",""),
-            data.get("Address",""),
-            data.get("Registration No","")
+            datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+            data.get("Name", ""),
+            data.get("Email", ""),
+            data.get("Mobile", ""),
+            data.get("Date of Birth", ""),
+            data.get("Post Applied For", ""),
+            data.get("Subject", ""),
+            data.get("Address", ""),
+            reg_no
         ]
-
-        print("WRITING ROW:", row)
 
         sheet.append_row(row, value_input_option="USER_ENTERED")
 
-        print("WRITE SUCCESS")
-
         return jsonify({
-            "status":"saved",
-            "message":"Row added to sheet"
+            "status": "saved",
+            "registration": reg_no
         })
 
     except Exception as e:
         print("WRITE FAILED:", str(e))
         return jsonify({
-            "status":"error",
-            "message":str(e)
-        }),500
+            "status": "error",
+            "message": str(e)
+        }), 500
 
-
-# -----------------------------------
-# Run server (Render compatible)
-# -----------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
