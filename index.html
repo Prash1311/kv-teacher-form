@@ -10,16 +10,24 @@ body{font-family:Arial,Helvetica,sans-serif;background:#eef2f5;margin:0}
 .container{background:white;max-width:900px;margin:auto;padding:15px}
 h2,h3{text-align:center;margin:6px}
 label{font-weight:600}
-input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #bbb;border-radius:6px;font-size:15px;box-sizing:border-box}
+input,select,textarea{
+  width:100%;padding:10px;margin:6px 0;
+  border:1px solid #bbb;border-radius:6px;
+  font-size:15px;box-sizing:border-box
+}
 table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #444;padding:6px;font-size:14px;text-align:center}
-button{background:#0b6efd;color:white;border:none;padding:12px;border-radius:8px;width:100%;font-size:16px;margin-top:12px;cursor:pointer}
+button{
+  background:#0b6efd;color:white;border:none;
+  padding:12px;border-radius:8px;width:100%;
+  font-size:16px;margin-top:12px;cursor:pointer
+}
 button.small{width:auto;padding:6px 10px;margin:3px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}th,td{font-size:12px}}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
 .photoBox{border:2px dashed #666;padding:15px;text-align:center;border-radius:10px}
-.error{color:red;font-size:14px}
-.success{color:green;font-size:15px;text-align:center;margin-top:10px}
+.error{color:red;margin-top:10px}
+.success{color:green;margin-top:10px}
 </style>
 </head>
 
@@ -32,7 +40,7 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <div class="grid">
 <div>
 <label>Post Applied For *</label>
-<select id="postApplied" required>
+<select id="postApplied">
 <option value="">Select</option>
 <option>PRT</option>
 <option>TGT</option>
@@ -44,7 +52,7 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 
 <div>
 <label>Subject *</label>
-<input id="subjectInput" type="text" required>
+<input id="subjectInput" type="text">
 </div>
 </div>
 
@@ -53,7 +61,7 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <div class="grid">
 <div>
 <label>Full Name *</label>
-<input id="name" type="text" required>
+<input id="name" type="text">
 </div>
 <div>
 <label>Father/Husband Name</label>
@@ -64,7 +72,7 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <div class="grid">
 <div>
 <label>Date of Birth *</label>
-<input id="dob" type="date" required>
+<input id="dob" type="date">
 </div>
 <div>
 <label>Gender</label>
@@ -79,16 +87,16 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <div class="grid">
 <div>
 <label>Mobile *</label>
-<input id="mobile" type="tel" pattern="[0-9]{10}" maxlength="10" required>
+<input id="mobile" type="tel" maxlength="10">
 </div>
 <div>
 <label>Email *</label>
-<input id="email" type="email" required>
+<input id="email" type="email">
 </div>
 </div>
 
 <label>Address *</label>
-<textarea id="address" rows="2" required></textarea>
+<textarea id="address" rows="2"></textarea>
 
 <div class="photoBox">
 <b>Take Selfie</b><br>
@@ -98,33 +106,25 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <h3>Teaching Experience</h3>
 <table id="exp">
 <tr>
-<th>Post</th><th>Subject</th><th>Institution</th><th>Board</th>
-<th>From</th><th>To</th><th>Years</th><th>Remove</th>
+<th>Post</th>
+<th>Subject</th>
+<th>Institution</th>
+<th>Board</th>
+<th>From</th>
+<th>To</th>
+<th>Remove</th>
 </tr>
 </table>
+
 <button type="button" onclick="addRow()">Add Experience</button>
 
 <button id="submitForm">Submit Application</button>
+
 <div id="message"></div>
 
 </div>
 
 <script>
-function calculateYears(row){
-    const dates = row.querySelectorAll("input[type='date']");
-    if(dates.length < 2) return;
-
-    const from = dates[0].value;
-    const to = dates[1].value;
-
-    if(from && to){
-        const d1 = new Date(from);
-        const d2 = new Date(to);
-        const years = ((d2 - d1)/(1000*60*60*24*365)).toFixed(1);
-        row.cells[6].innerText = years > 0 ? years : 0;
-    }
-}
-
 function addRow(){
 let t=document.getElementById('exp');
 let r=t.insertRow(-1);
@@ -133,17 +133,16 @@ r.innerHTML=`
 <td><input></td>
 <td><input></td>
 <td><select><option>CBSE</option><option>State</option><option>ICSE</option></select></td>
-<td><input type="date" onchange="calculateYears(this.closest('tr'))"></td>
-<td><input type="date" onchange="calculateYears(this.closest('tr'))"></td>
-<td></td>
+<td><input type="date"></td>
+<td><input type="date"></td>
 <td><button class='small' onclick="this.closest('tr').remove()">X</button></td>`;
 }
 
 document.getElementById("submitForm").addEventListener("click", async function(e){
     e.preventDefault();
 
-    const messageDiv = document.getElementById("message");
-    messageDiv.innerHTML = "";
+    const msg = document.getElementById("message");
+    msg.innerHTML = "";
 
     const name = document.getElementById("name").value.trim();
     const mobile = document.getElementById("mobile").value.trim();
@@ -154,12 +153,12 @@ document.getElementById("submitForm").addEventListener("click", async function(e
     const address = document.getElementById("address").value.trim();
 
     if(!name || !mobile || !email || !dob || !post || !subject || !address){
-        messageDiv.innerHTML = "<div class='error'>Please fill all required fields.</div>";
+        msg.innerHTML = "<div class='error'>Please fill all required fields.</div>";
         return;
     }
 
     if(!/^[0-9]{10}$/.test(mobile)){
-        messageDiv.innerHTML = "<div class='error'>Mobile number must be 10 digits.</div>";
+        msg.innerHTML = "<div class='error'>Mobile number must be 10 digits.</div>";
         return;
     }
 
@@ -183,14 +182,13 @@ document.getElementById("submitForm").addEventListener("click", async function(e
         const result = await res.json();
 
         if(result.status === "saved"){
-            messageDiv.innerHTML = "<div class='success'>Application Submitted Successfully! Registration No: " + result.registration + "</div>";
-            document.querySelector("form")?.reset();
+            msg.innerHTML = "<div class='success'>Application Submitted Successfully! Registration No: " + result.registration + "</div>";
         } else {
-            messageDiv.innerHTML = "<div class='error'>Error: " + result.message + "</div>";
+            msg.innerHTML = "<div class='error'>Error: " + result.message + "</div>";
         }
 
     }catch(err){
-        messageDiv.innerHTML = "<div class='error'>Submission failed. Check internet or deployment.</div>";
+        msg.innerHTML = "<div class='error'>Submission failed. Open via GitHub Pages or Live Server.</div>";
     }
 });
 </script>
