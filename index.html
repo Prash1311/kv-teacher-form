@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KV Contractual Teacher Application</title>
+
 <h2>KENDRIYA VIDYALAYA K R PURAM</h2>
 <h3>PART-TIME CONTRACTUAL TEACHERS FORM</h3>
+
 <style>
 body{font-family:Arial,Helvetica,sans-serif;background:#eef2f5;margin:0}
 .container{background:white;max-width:900px;margin:auto;padding:15px}
@@ -21,12 +23,14 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 .photoBox{border:2px dashed #666;padding:15px;text-align:center;border-radius:10px}
 </style>
 </head>
+
 <body>
 <div class="container">
+
 <div class="grid">
 <div>
 <label>Post Applied For</label>
-<select id="postApplied" onchange="toggleSubject()">
+<select id="postApplied">
 <option>PRT</option>
 <option>TGT</option>
 <option>PGT</option>
@@ -34,30 +38,31 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <option>Other</option>
 </select>
 </div>
+
 <div>
-<label id="subjLabel">Subject</label>
+<label>Subject</label>
 <input id="subjectInput" type="text">
 </div>
 </div>
+
 <h3>Personal Details</h3>
 <div class="grid">
-<div><label>Full Name</label><input type="text"></div>
+<div><label>Full Name</label><input id="name" type="text"></div>
 <div><label>Father/Husband Name</label><input type="text"></div>
 </div>
+
 <div class="grid">
-<div><label>Date of Birth</label><input type="date"></div>
+<div><label>Date of Birth</label><input id="dob" type="date"></div>
 <div><label>Gender</label><select><option>Male</option><option>Female</option><option>Other</option></select></div>
 </div>
+
 <div class="grid">
-<div><label>Mobile</label><input type="tel"></div>
-<div><label>Email</label><input type="email"></div>
-</div>
-<label>Address</label><textarea rows="2"></textarea>
-<div class="grid">
-<div><label>Marital Status</label><select><option>Single</option><option>Married</option><option>Widowed</option></select></div>
-<div><label>Category</label><select><option>General</option><option>OBC</option><option>SC</option><option>ST</option></select></div>
+<div><label>Mobile</label><input id="mobile" type="tel"></div>
+<div><label>Email</label><input id="email" type="email"></div>
 </div>
 
+<label>Address</label>
+<textarea id="address" rows="2"></textarea>
 
 <div class="photoBox">
 <b>Take Selfie</b><br>
@@ -66,7 +71,6 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 
 <h3>Teaching Experience</h3>
 <table id="exp">
-
 <tr><th>Post</th><th>Subject</th><th>Institution</th><th>Board</th><th>From</th><th>To</th><th>Years</th><th>Remove</th></tr>
 </table>
 <button type="button" onclick="addRow()">Add Experience</button>
@@ -79,22 +83,13 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 <tr><td>Post Graduation</td><td><input></td><td><input></td><td><input></td><td></td></tr>
 <tr><td>B.Ed/JBT</td><td><input></td><td><input></td><td><input></td><td></td></tr>
 </table>
-<button type="button" onclick="addAcad()">Add Qualification</button>
 
 <button id="submitForm">Submit / Save PDF</button>
 
 </div>
 
 <script>
-function yearDiff(from,to){
-if(!from||!to) return '';
-let f=new Date(from); let t=new Date(to);
-let y=(t-f)/(1000*60*60*24*365);
-return y>0?y.toFixed(1):'';
-}
-
 function addRow(){
-if(document.getElementById('exp').rows.length==1){}
 let t=document.getElementById('exp');
 let r=t.insertRow(-1);
 r.innerHTML=`
@@ -102,47 +97,27 @@ r.innerHTML=`
 <td><input></td>
 <td><input></td>
 <td><select><option>CBSE</option><option>State</option><option>ICSE</option></select></td>
-<td><input type="date" onchange="calc(this)"></td>
-<td><input type="date" onchange="calc(this)"></td>
-<td class='years'></td>
+<td><input type="date"></td>
+<td><input type="date"></td>
+<td></td>
 <td><button class='small' onclick="this.closest('tr').remove()">X</button></td>`;
 }
-
-function calc(el){
-let row=el.closest('tr');
-let from=row.children[4].children[0].value;
-let to=row.children[5].children[0].value;
-row.children[6].innerText=yearDiff(from,to);
-}
-
-function addAcad(){
-let t=document.getElementById('acad');
-let r=t.insertRow(-1);
-r.innerHTML=`<td><input placeholder='Exam'></td><td><input></td><td><input></td><td><input></td><td><button class='small' onclick="this.closest('tr').remove()">X</button></td>`;
-}
-function toggleSubject(){
-const p=document.getElementById('postApplied').value;
-const lbl=document.getElementById('subjLabel');
-const inp=document.getElementById('subjectInput');
-if(p==='Other'){lbl.innerText='DETAILS';inp.placeholder='Specify details';}
-else{lbl.innerText='Subject';inp.placeholder='';}
-}
 </script>
-<script>
+
+<!-- 🔥 FIXED SUBMIT SCRIPT -->
 <script>
 document.getElementById("submitForm").addEventListener("click", async function(e){
     e.preventDefault();
 
-    // Map exact fields needed by backend
     const data = {
-        "Name": document.querySelector("input[type=text]").value,
-        "Email": document.querySelector("input[type=email]").value,
-        "Mobile": document.querySelector("input[type=tel]").value,
-        "Date of Birth": document.querySelector("input[type=date]").value,
+        "Name": document.getElementById("name").value,
+        "Email": document.getElementById("email").value,
+        "Mobile": document.getElementById("mobile").value,
+        "Date of Birth": document.getElementById("dob").value,
         "Post Applied For": document.getElementById("postApplied").value,
         "Subject": document.getElementById("subjectInput").value,
-        "Address": document.querySelector("textarea").value,
-        "Registration No": "TEMP-" + Date.now()   // temporary until we generate real reg no
+        "Address": document.getElementById("address").value,
+        "Registration No": "TEMP-" + Date.now()
     };
 
     try{
@@ -165,9 +140,6 @@ document.getElementById("submitForm").addEventListener("click", async function(e
     }
 });
 </script>
-</script>
-
-
 
 </body>
 </html>
