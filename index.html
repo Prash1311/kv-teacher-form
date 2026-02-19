@@ -6,246 +6,215 @@
     <title>KV K.R. Puram - Teacher Application</title>
     <style>
         :root { --primary: #0b6efd; --success: #28a745; --bg: #f4f7f9; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { background: white; max-width: 900px; margin: auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body { font-family: Arial, Helvetica, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        .container { background: white; max-width: 1000px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        /* Header & Photo Layout */
-        .header-section { display: flex; justify-content: space-between; gap: 20px; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
-        .header-text { flex: 3; }
-        .photo-sidebar { flex: 1; max-width: 150px; text-align: center; }
-        .photo-preview { width: 130px; height: 160px; border: 2px dashed #bbb; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; background: #fafafa; overflow: hidden; font-size: 12px; color: #888; }
+        /* Layout: Photo Top Right */
+        .header-wrapper { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+        .header-info { flex: 1; }
+        .photo-area { width: 150px; text-align: center; border: 1px solid #ccc; padding: 5px; background: #fff; }
+        .photo-preview { width: 140px; height: 170px; border: 1px dashed #aaa; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa; margin-bottom: 5px; font-size: 12px; color: #666; }
         .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
 
-        h2, h3 { color: #333; margin: 5px 0; }
-        label { font-weight: 600; display: block; margin-top: 10px; font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        .readonly-box { background: #e9ecef; font-weight: bold; }
+        h2, h3 { text-align: center; margin: 5px 0; text-transform: uppercase; }
+        h4 { margin: 20px 0 10px 0; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
-        th, td { border: 1px solid #dee2e6; padding: 10px; font-size: 13px; text-align: center; }
-        th { background: #f8f9fa; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        label { font-weight: bold; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #bbb; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Qualification Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        th, td { border: 1px solid #000; padding: 4px; font-size: 12px; text-align: center; word-wrap: break-word; }
+        th { background: #f2f2f2; }
+        .table-input { width: 100%; border: none; padding: 4px; text-align: center; font-size: 12px; }
+        .table-input:focus { outline: none; background: #fffde7; }
 
-        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        button:hover { opacity: 0.9; }
-        .btn-add { background: #6c757d; width: auto; padding: 6px 15px; font-size: 13px; margin-top: 10px; }
-        .btn-print { background: var(--success); display: none; margin-top: 10px; }
+        .btn-row { margin-top: 20px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        #submitBtn { background: var(--primary); color: white; }
+        .print-btn { background: var(--success); color: white; display: none; }
 
-        #successMessage { display: none; text-align: center; padding: 40px; }
-        .reg-number { font-size: 24px; color: var(--primary); font-weight: bold; margin: 15px 0; }
+        #successOverlay { display: none; text-align: center; padding: 20px; border: 2px solid var(--success); margin-top: 20px; border-radius: 8px; }
 
         @media print {
             body { background: white; padding: 0; }
-            .container { box-shadow: none; max-width: 100%; width: 100%; }
-            button, .btn-add, #photoInput, .no-print { display: none !important; }
-            .btn-print { display: none !important; }
-            input, select, textarea { border: none; border-bottom: 1px solid #ddd; }
+            .container { box-shadow: none; width: 100%; max-width: 100%; }
+            button, #photoInput, .no-print { display: none !important; }
+            .print-btn { display: none !important; }
+            input, textarea { border: none; border-bottom: 1px solid #eee; }
+            .photo-area { border: 1px solid #000; }
         }
-        @media (max-width: 600px) { .header-section { flex-direction: column-reverse; align-items: center; } .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="container" id="mainForm">
-    <div class="header-section">
-        <div class="header-text">
+<div class="container">
+    <div class="header-wrapper">
+        <div class="header-info">
             <h2>KENDRIYA VIDYALAYA K R PURAM</h2>
-            <h3>Contractual Appointment Application</h3>
+            <h3>Part-Time Contractual Teacher Application</h3>
             <div class="grid">
                 <div>
                     <label>Post Applied For *</label>
-                    <select id="postApplied" required>
-                        <option value="">--Select--</option>
-                        <option>PGT</option>
-                        <option>TGT</option>
-                        <option>PRT</option>
-                        <option>Computer Instructor</option>
-                        <option>Coach/Nurse/Counsellor</option>
+                    <select id="postApplied">
+                        <option value="">Select</option>
+                        <option>PGT</option><option>TGT</option><option>PRT</option>
+                        <option>Computer Instructor</option><option>Other</option>
                     </select>
                 </div>
                 <div>
                     <label>Subject *</label>
-                    <input type="text" id="subjectInput" placeholder="e.g. Maths, English">
+                    <input type="text" id="subject">
                 </div>
             </div>
         </div>
-        <div class="photo-sidebar">
-            <div class="photo-preview" id="preview">Photo</div>
-            <input type="file" id="photoInput" accept="image/*" capture="user">
+        <div class="photo-area">
+            <div class="photo-preview" id="preview">Paste Photo / Selfie</div>
+            <input type="file" id="photoInput" accept="image/*" capture="user" style="font-size: 10px;">
         </div>
     </div>
 
-    <h3>1. Personal Details</h3>
+    <h4>1. Personal Details</h4>
     <div class="grid">
-        <div>
-            <label>Full Name *</label>
-            <input type="text" id="name" required>
-        </div>
-        <div>
-            <label>Father/Husband Name</label>
-            <input type="text" id="fatherName">
-        </div>
+        <div><label>Full Name *</label><input type="text" id="name"></div>
+        <div><label>Father/Husband Name</label><input type="text"></div>
     </div>
-
     <div class="grid">
-        <div>
-            <label>Date of Birth *</label>
-            <input type="date" id="dob" onchange="calculateAge()" required>
-        </div>
-        <div>
-            <label>Age (Auto-Calculated)</label>
-            <input type="text" id="age" class="readonly-box" readonly>
-        </div>
+        <div><label>Date of Birth *</label><input type="date" id="dob" onchange="calculateAge()"></div>
+        <div><label>Age (as on today)</label><input type="text" id="age" readonly style="background:#eee"></div>
     </div>
-
     <div class="grid">
-        <div>
-            <label>Email ID *</label>
-            <input type="email" id="email" required>
-        </div>
-        <div>
-            <label>Mobile Number *</label>
-            <input type="tel" id="mobile" maxlength="10" required>
-        </div>
+        <div><label>Mobile Number *</label><input type="tel" id="mobile" maxlength="10"></div>
+        <div><label>Email ID *</label><input type="email" id="email"></div>
     </div>
+    <label>Address for Correspondence *</label>
+    <textarea id="address" rows="2"></textarea>
 
-    <label>Full Correspondence Address *</label>
-    <textarea id="address" rows="2" required></textarea>
-
-    <h3>2. Academic Qualifications</h3>
-    <table id="qualTable">
-        <tr>
-            <th>Exam</th>
-            <th>Board/Uni</th>
-            <th>Year</th>
-            <th>% Marks</th>
-            <th>Subjects</th>
-        </tr>
-        <tr>
-            <td><b>Class XII</b></td>
-            <td><input type="text"></td>
-            <td><input type="number"></td>
-            <td><input type="number"></td>
-            <td><input type="text"></td>
-        </tr>
-        <tr>
-            <td><b>Graduation</b></td>
-            <td><input type="text"></td>
-            <td><input type="number"></td>
-            <td><input type="number"></td>
-            <td><input type="text"></td>
-        </tr>
-        <tr>
-            <td><b>B.Ed/D.El.Ed</b></td>
-            <td><input type="text"></td>
-            <td><input type="number"></td>
-            <td><input type="number"></td>
-            <td><input type="text"></td>
-        </tr>
-    </table>
-
-    <h3>3. Teaching Experience</h3>
-    <table id="expTable">
+    <h4>2. Academic Qualification (Starting from +2 stage)</h4>
+    <table>
         <thead>
             <tr>
-                <th>Post</th>
-                <th>Institution</th>
-                <th>From</th>
-                <th>To</th>
-                <th class="no-print">Action</th>
+                <th rowspan="2" style="width: 15%;">Name of Exam</th>
+                <th rowspan="2">Name of Exam Passed</th>
+                <th rowspan="2" style="width: 8%;">Year of Passing</th>
+                <th colspan="3">Aggregate Marks</th>
+                <th rowspan="2">Percentage in subject applied</th>
+                <th rowspan="2" style="width: 6%;">Medium</th>
+                <th rowspan="2">Subjects</th>
+                <th rowspan="2">Board/ University</th>
+            </tr>
+            <tr>
+                <th>Max Marks</th>
+                <th>Marks Obtained</th>
+                <th>Overall %</th>
             </tr>
         </thead>
-        <tbody id="expBody"></tbody>
+        <tbody>
+            <tr>
+                <td><b>Senior Secondary</b></td>
+                <td><input class="table-input" type="text" value="Class XII" readonly></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+            </tr>
+            <tr>
+                <td><b>Graduation</b></td>
+                <td><input class="table-input" type="text" placeholder="Course Name"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+            </tr>
+            <tr>
+                <td><b>Post-Graduation</b></td>
+                <td><input class="table-input" type="text" placeholder="Course Name"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+            </tr>
+            <tr>
+                <td><b>Professional</b></td>
+                <td><input class="table-input" type="text" placeholder="B.Ed/JBT/etc"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="number"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+                <td><input class="table-input" type="text"></td>
+            </tr>
+        </tbody>
     </table>
-    <button type="button" class="btn-add no-print" onclick="addExperienceRow()">+ Add Experience</button>
 
-    <div id="submissionArea">
-        <button type="button" id="submitBtn">Submit Application</button>
+    <label style="margin-top:15px; display:block;">13. Any other relevant qualifications like CTET / Experience (Specify):</label>
+    <textarea id="ctet" rows="2"></textarea>
+
+    <label>14. Mention the areas other than Academic where you can contribute:</label>
+    <textarea id="extra" rows="2"></textarea>
+
+    <div id="successOverlay">
+        <h2 style="color: var(--success);">Application Submitted Successfully!</h2>
+        <p>Registration Number: <span id="regNoDisplay" style="font-weight:bold; color:var(--primary);"></span></p>
+        <p>Thank you! Please save/print this application for the interview.</p>
+        <button class="print-btn" id="printBtn" onclick="window.print()" style="display:inline-block; width: 250px;">💾 Save as PDF</button>
     </div>
 
-    <div id="successMessage">
-        <h1 style="color: var(--success);">Thank You!</h1>
-        <p>Your application has been received successfully.</p>
-        <div class="reg-number" id="regNo">KV-2026-0000</div>
-        <p>Please print this page for your records.</p>
-        <button type="button" class="btn-print" id="printBtn" onclick="window.print()" style="display:block;">Download PDF / Print</button>
+    <div class="btn-row" id="actionButtons">
+        <button id="submitBtn">Submit Application</button>
     </div>
 </div>
 
 <script>
-    // 1. Automatic Age Calculation
     function calculateAge() {
-        const dobVal = document.getElementById("dob").value;
-        if (!dobVal) return;
-        const birth = new Date(dobVal);
-        const now = new Date();
-        let age = now.getFullYear() - birth.getFullYear();
-        if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) {
-            age--;
-        }
+        const dob = document.getElementById("dob").value;
+        if (!dob) return;
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
         document.getElementById("age").value = age + " Years";
     }
 
-    // 2. Photo Preview
     document.getElementById("photoInput").addEventListener("change", function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
-            };
+            reader.onload = e => document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
             reader.readAsDataURL(file);
         }
     });
 
-    // 3. Experience Table Rows
-    function addExperienceRow() {
-        const tbody = document.getElementById("expBody");
-        const row = tbody.insertRow();
-        row.innerHTML = `
-            <td><input type="text"></td>
-            <td><input type="text"></td>
-            <td><input type="date"></td>
-            <td><input type="date"></td>
-            <td class="no-print"><button class="btn-add" style="background:red" onclick="this.parentElement.parentElement.remove()">X</button></td>
-        `;
-    }
-
-    // 4. Form Submission Logic
-    document.getElementById("submitBtn").addEventListener("click", async function() {
-        const name = document.getElementById("name").value;
-        const post = document.getElementById("postApplied").value;
-
-        if (!name || !post) {
-            alert("Please fill in Name and Post Applied For.");
-            return;
-        }
+    document.getElementById("submitBtn").addEventListener("click", function() {
+        const name = document.getElementById("name").value.trim();
+        if (!name) { alert("Please fill at least your Name."); return; }
 
         // Generate Registration Number
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        const finalRegNo = "KV-KRP-" + new Date().getFullYear() + "-" + randomNum;
-
-        // Visual change
-        this.innerText = "Processing...";
-        this.disabled = true;
-
-        // Transition to Success Screen
-        setTimeout(() => {
-            // Hide entry controls
-            document.getElementById("submissionArea").style.display = "none";
-            document.getElementById("photoInput").style.display = "none";
-            document.querySelectorAll(".no-print").forEach(el => el.style.display = "none");
-            
-            // Show result
-            document.getElementById("regNo").innerText = finalRegNo;
-            document.getElementById("successMessage").style.display = "block";
-            
-            // Scroll to top for PDF view
-            window.scrollTo(0, 0);
-        }, 1500);
-
-        // Note: To actually save to Google Sheets, you would use fetch() here
-        // with your Google Script URL as shown in your original code.
+        const regNo = "KV-KRP-2026-" + Math.floor(1000 + Math.random() * 9000);
+        
+        // Hide Form Buttons and Show Success
+        document.getElementById("actionButtons").style.display = "none";
+        document.getElementById("photoInput").style.display = "none";
+        document.getElementById("regNoDisplay").innerText = regNo;
+        document.getElementById("successOverlay").style.display = "block";
+        
+        window.scrollTo(0,0);
     });
 </script>
 
