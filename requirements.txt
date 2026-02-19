@@ -1,7 +1,8 @@
-flask
-pandas
-openpyxl
-gunicorn
+Flask
 flask-cors
 gspread
 oauth2client
+pandas
+reportlab
+pillow
+gunicorn
