@@ -117,7 +117,6 @@ button.small{width:auto;padding:6px 10px;margin:3px}
 </table>
 
 <button type="button" onclick="addRow()">Add Experience</button>
-
 <button id="submitForm">Submit Application</button>
 
 <div id="message"></div>
@@ -175,11 +174,11 @@ document.getElementById("submitForm").addEventListener("click", async function(e
     try{
         const res = await fetch("https://script.google.com/macros/s/AKfycbztgC1UwbByGOm4EEUJeDNqhB5JtOQmid7lbW5UAHJY91GFtyJ-iXNasPKzg-59epen/exec",{
             method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(data)
+            body: JSON.stringify(data)
         });
 
-        const result = await res.json();
+        const text = await res.text();
+        const result = JSON.parse(text);
 
         if(result.status === "saved"){
             msg.innerHTML = "<div class='success'>Application Submitted Successfully! Registration No: " + result.registration + "</div>";
@@ -188,7 +187,8 @@ document.getElementById("submitForm").addEventListener("click", async function(e
         }
 
     }catch(err){
-        msg.innerHTML = "<div class='error'>Submission failed. Open via GitHub Pages or Live Server.</div>";
+        console.error(err);
+        msg.innerHTML = "<div class='error'>Submission failed. Check deployment.</div>";
     }
 });
 </script>
