@@ -1,26 +1,33 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pandas as pd
-import os
-<<<<<<< HEAD
-print("SERVER VERSION 3 LOADED")
-=======
-print("NEW VERSION RUNNING")
->>>>>>> 4f6475392fe3b0e00ae299a081eda23d9ea23ad0
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+print("SERVER GOOGLE SHEET VERSION RUNNING")
 
 app = Flask(__name__)
 CORS(app)
-print("NEW VERSION RUNNING")
 
-FILE = "teachers.xlsx"
+# -------------------------------
+# Google Sheet connection
+# -------------------------------
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+]
+
+creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+client = gspread.authorize(creds)
+
+sheet = client.open("KV_Teacher_Data").sheet1
 
 
 # -------------------------------
-# Home route (health check)
+# Health check route (Render needs this)
 # -------------------------------
 @app.route("/")
 def home():
-    return "KV Teacher Data Server Running"
+    return "KV Teacher Google Sheet Server Running"
 
 
 # -------------------------------
@@ -34,15 +41,19 @@ def submit():
         if not data:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # Create or append Excel
-        if os.path.exists(FILE):
-            df = pd.read_excel(FILE)
-            new_row = pd.DataFrame([data])
-            df = pd.concat([df, new_row], ignore_index=True)
-        else:
-            df = pd.DataFrame([data])
+        # Map form data to sheet columns
+        row = [
+            data.get("Name",""),
+            data.get("Email",""),
+            data.get("Mobile",""),
+            data.get("Date of Birth",""),
+            data.get("Post Applied For",""),
+            data.get("Subject",""),
+            data.get("Address",""),
+            data.get("Registration No","")
+        ]
 
-        df.to_excel(FILE, index=False)
+        sheet.append_row(row)
 
         return jsonify({"status": "saved"})
 
@@ -51,28 +62,7 @@ def submit():
 
 
 # -------------------------------
-# Download Excel route
-# -------------------------------
-@app.route("/download")
-def download():
-    if os.path.exists(FILE):
-        return send_file(FILE, as_attachment=True)
-    return "No data available yet. Submit a form first."
-# -------------------------------
-# Send data to dashboard
-# -------------------------------
-@app.route("/data")
-def get_data():
-    if not os.path.exists(FILE):
-        return jsonify([])
-
-    df = pd.read_excel(FILE)
-    return df.fillna("").to_dict(orient="records")
-
-
-
-# -------------------------------
-# Run server
+# Run server (Render compatible)
 # -------------------------------
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=10000)
