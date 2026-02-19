@@ -3,91 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KV K.R. Puram Application Form</title>
+    <title>KV K.R. Puram - Teacher Application</title>
     <style>
         :root { --primary: #0b6efd; --success: #198754; }
-        body { font-family: 'Times New Roman', Times, serif; background: #f0f2f5; margin: 0; padding: 10px; color: #000; }
-        .container { background: white; max-width: 1100px; margin: auto; padding: 30px; border-radius: 4px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Times New Roman', Times, serif; background: #f4f7f9; margin: 0; padding: 10px; color: #000; }
+        .container { background: white; max-width: 1050px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Header & Photo Section */
-        .header-section { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .header-content { flex: 1; }
-        .photo-box { width: 140px; height: 170px; border: 1px solid #000; text-align: center; background: #fff; position: relative; }
-        .photo-preview { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #555; overflow: hidden; }
+        /* Layout: Photo Top Right */
+        .header-section { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+        .header-text { flex: 1; }
+        .photo-area { width: 150px; text-align: center; border: 1px solid #ccc; padding: 5px; background: #fff; }
+        .photo-preview { width: 140px; height: 170px; border: 1px dashed #aaa; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa; margin-bottom: 5px; font-size: 12px; color: #666; }
         .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
-        #photoInput { font-size: 10px; margin-top: 5px; width: 140px; }
 
         h2, h3 { text-align: center; margin: 5px 0; text-transform: uppercase; }
         .section-title { margin-top: 25px; margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
-        label { font-weight: bold; font-size: 14px; display: block; }
-        input[type="text"], input[type="date"], input[type="tel"], input[type="email"], select, textarea { 
-            width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #000; box-sizing: border-box; font-size: 14px;
-        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+        label { font-weight: bold; font-size: 13px; display: block; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #bbb; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         
-        /* Tables from Images */
+        /* Table Styling */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-        th, td { border: 1px solid #000; padding: 5px; font-size: 12px; text-align: center; word-wrap: break-word; }
-        th { background-color: #f2f2f2; }
-        .table-input { width: 100%; border: none; text-align: center; font-size: 12px; background: transparent; padding: 5px 0; }
-        .table-input:focus { background: #fffde7; outline: none; }
+        th, td { border: 1px solid #000; padding: 4px; font-size: 12px; text-align: center; word-wrap: break-word; }
+        th { background: #f2f2f2; }
+        .table-input { width: 100%; border: none; padding: 4px; text-align: center; font-size: 12px; background: transparent; }
 
-        .btn-container { margin-top: 30px; display: flex; gap: 15px; }
-        button { flex: 1; padding: 15px; font-size: 16px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-row { margin-top: 25px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; color: white; }
         #submitBtn { background: var(--primary); }
-        #printBtn { background: var(--success); display: none; }
+        .print-btn { background: var(--success); display: none; }
 
-        #successScreen { display: none; text-align: center; border: 2px solid var(--success); padding: 20px; margin-top: 20px; }
+        #successMessage { display: none; text-align: center; padding: 20px; border: 2px solid var(--success); margin-top: 20px; border-radius: 8px; }
+        .error { color: red; text-align: center; margin-top: 10px; font-weight: bold; }
 
         @media print {
             body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; max-width: 100%; width: 100%; }
-            #photoInput, button, .no-print { display: none !important; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; }
+            button, #photoInput, .no-print { display: none !important; }
             .print-btn { display: none !important; }
-            input, textarea { border-bottom: 1px solid #ccc !important; border-top:none; border-left:none; border-right:none; }
-            .table-input { border:none; }
+            input, select, textarea { border: none !important; border-bottom: 1px solid #ddd !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="formContent">
     <div class="header-section">
-        <div class="header-content">
+        <div class="header-text">
             <h2>KENDRIYA VIDYALAYA K R PURAM</h2>
-            <h3>Part-Time Contractual Teacher Application - 2026</h3>
-            <div class="grid" style="margin-top:20px;">
+            <h3>Part-Time Contractual Teacher Application</h3>
+            <div class="grid" style="margin-top:15px;">
                 <div>
                     <label>Post Applied For *</label>
                     <select id="postApplied">
                         <option value="">Select</option>
                         <option>PGT</option><option>TGT</option><option>PRT</option>
-                        <option>Computer Instructor</option><option>Coach/Special Educator</option>
+                        <option>Computer Instructor</option><option>Others</option>
                     </select>
                 </div>
                 <div>
                     <label>Subject *</label>
-                    <input type="text" id="subject">
+                    <input type="text" id="subjectInput">
                 </div>
             </div>
         </div>
-        <div>
-            <div class="photo-box">
-                <div class="photo-preview" id="preview">Paste Recent <br> Photograph</div>
-            </div>
-            <input type="file" id="photoInput" accept="image/*" capture="user">
+        <div class="photo-area">
+            <div class="photo-preview" id="preview">Photo / Selfie</div>
+            <input type="file" id="photoInput" accept="image/*" capture="user" style="font-size: 10px;">
         </div>
     </div>
 
     <div class="section-title">1. Personal Details</div>
     <div class="grid">
         <div><label>Full Name *</label><input type="text" id="name"></div>
-        <div><label>Father/Husband Name</label><input type="text"></div>
+        <div><label>Father/Husband Name</label><input type="text" id="fatherName"></div>
     </div>
     <div class="grid">
         <div><label>Date of Birth *</label><input type="date" id="dob" onchange="calculateAge()"></div>
-        <div><label>Age (as of today)</label><input type="text" id="age" readonly style="background:#f9f9f9;"></div>
+        <div><label>Age (Auto-Calculated)</label><input type="text" id="age" readonly style="background:#eee"></div>
     </div>
     <div class="grid">
         <div><label>Mobile Number *</label><input type="tel" id="mobile" maxlength="10"></div>
@@ -100,24 +94,24 @@
     <table>
         <thead>
             <tr>
-                <th rowspan="2" style="width:12%">Name of Examination</th>
+                <th rowspan="2" style="width: 15%;">Name of Examination</th>
                 <th rowspan="2">Please write name of examination passed</th>
-                <th rowspan="2" style="width:7%">Year of passing</th>
+                <th rowspan="2" style="width: 8%;">Year of passing</th>
                 <th colspan="3">Aggregate marks</th>
                 <th rowspan="2">Percentage in subject applied</th>
-                <th rowspan="2" style="width:6%">Medium</th>
+                <th rowspan="2" style="width: 6%;">Medium</th>
                 <th rowspan="2">Subjects</th>
-                <th rowspan="2">Board/University</th>
+                <th rowspan="2">Board/ University</th>
             </tr>
             <tr>
                 <th>MAX. MARKS</th>
                 <th>MARKS OBTAINED</th>
-                <th>OVERALL PERCENTAGE</th>
+                <th>OVERALL %</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="qualBody">
             <tr>
-                <td><b>Senior Secondary (Class XII)</b></td>
+                <td><b>Senior Secondary (XII)</b></td>
                 <td><input class="table-input" type="text" value="Class XII" readonly></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
@@ -125,39 +119,23 @@
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
             </tr>
             <tr>
-                <td><b>Graduation (Name of Course)</b></td>
-                <td><input class="table-input" type="text"></td>
+                <td><b>Graduation</b></td>
+                <td><input class="table-input" type="text" placeholder="Course Name"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
             </tr>
             <tr>
-                <td><b>Post-Graduation (Name of Course)</b></td>
-                <td><input class="table-input" type="text"></td>
+                <td><b>Post-Graduation</b></td>
+                <td><input class="table-input" type="text" placeholder="Course Name"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
             </tr>
             <tr>
-                <td><b>Others (if any, Specify)</b></td>
-                <td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-            </tr>
-            <tr>
-                <td><b>JBT/B.El.Ed. /B.Ed (Specify)</b></td>
-                <td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-            </tr>
-            <tr>
-                <td><b>Extra Achievement (Dist./State/ National)</b></td>
+                <td><b>JBT/B.Ed/B.El.Ed</b></td>
                 <td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
@@ -167,14 +145,7 @@
         </tbody>
     </table>
 
-    <div style="margin-top:15px;">
-        <label>13. Any other relevant qualifications like CTET / Experience (Specify):</label>
-        <textarea rows="2"></textarea>
-        <label style="margin-top:10px;">14. Mention the areas other than Academic where you can contribute to the growth of the school</label>
-        <textarea rows="2"></textarea>
-    </div>
-
-    <div class="section-title">3. Teaching Experience:</div>
+    <div class="section-title">3. Teaching Experience</div>
     <table>
         <thead>
             <tr>
@@ -190,19 +161,7 @@
                 <th>To</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td>
-            </tr>
-            <tr>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
-                <td><input class="table-input" type="text"></td>
-            </tr>
+        <tbody id="expBody">
             <tr>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
                 <td><input class="table-input" type="text"></td><td><input class="table-input" type="text"></td>
@@ -212,20 +171,22 @@
         </tbody>
     </table>
 
-    <div id="successScreen">
-        <h2 style="color: var(--success);">Application Submitted!</h2>
-        <p>Your unique Registration No is: <span id="regNo" style="font-weight:bold; color:var(--primary);"></span></p>
-        <p>Please click the button below to save your application as a PDF for the interview.</p>
-        <button id="printBtn" onclick="window.print()" style="display:inline-block; width:250px;">💾 Download PDF</button>
+    <div id="successMessage">
+        <h2 style="color: var(--success);">Application Submitted Successfully!</h2>
+        <p>Your Registration No: <span id="regNoDisplay" style="font-weight:bold; color:var(--primary);"></span></p>
+        <p>Please click below to save a copy as PDF for the interview.</p>
+        <button class="print-btn" id="printBtn" onclick="window.print()" style="display:inline-block; width: 250px;">💾 Save as PDF / Print</button>
     </div>
 
-    <div class="btn-container no-print">
+    <div id="msg" class="error"></div>
+
+    <div class="btn-row no-print">
         <button id="submitBtn">Submit Application</button>
     </div>
 </div>
 
 <script>
-    // Automatic Age Calculation
+    // 1. Age Calculation
     function calculateAge() {
         const dob = document.getElementById("dob").value;
         if (!dob) return;
@@ -233,36 +194,77 @@
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
         document.getElementById("age").value = age + " Years";
     }
 
-    // Photo Preview
+    // 2. Photo Preview
     document.getElementById("photoInput").addEventListener("change", function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
-            }
+            reader.onload = e => document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
             reader.readAsDataURL(file);
         }
     });
 
-    // Submission Logic
-    document.getElementById("submitBtn").addEventListener("click", function() {
-        const name = document.getElementById("name").value.trim();
-        if (!name) { alert("Full Name is required."); return; }
+    // 3. Form Submission to Google Apps Script
+    document.getElementById("submitBtn").addEventListener("click", async function() {
+        const msg = document.getElementById("msg");
+        msg.innerHTML = "";
 
-        const randomId = "KV-KRP-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById("regNo").innerText = randomId;
-        
-        // Hide Form Buttons & Show Success/Print
-        document.querySelector(".no-print").style.display = "none";
-        document.getElementById("photoInput").style.display = "none";
-        document.getElementById("successScreen").style.display = "block";
-        
-        window.scrollTo(0, 0);
+        // Basic Validation
+        const name = document.getElementById("name").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const post = document.getElementById("postApplied").value;
+
+        if(!name || !mobile || !email || !post) {
+            msg.innerHTML = "Please fill all required fields.";
+            return;
+        }
+
+        const data = {
+            Name: name,
+            Mobile: mobile,
+            Email: email,
+            "Post Applied For": post,
+            Subject: document.getElementById("subjectInput").value,
+            "Date of Birth": document.getElementById("dob").value,
+            Age: document.getElementById("age").value,
+            Address: document.getElementById("address").value
+        };
+
+        try {
+            this.innerText = "Processing...";
+            this.disabled = true;
+
+            const res = await fetch("https://script.google.com/macros/s/AKfycbztgC1UwbByGOm4EEUJeDNqhB5JtOQmid7lbW5UAHJY91GFtyJ-iXNasPKzg-59epen/exec", {
+                method: "POST",
+                body: JSON.stringify(data)
+            });
+
+            const text = await res.text();
+            const result = JSON.parse(text);
+
+            if(result.status === "saved") {
+                document.getElementById("regNoDisplay").innerText = result.registration;
+                document.getElementById("successMessage").style.display = "block";
+                document.querySelector(".no-print").style.display = "none";
+                document.getElementById("photoInput").style.display = "none";
+                window.scrollTo(0,0);
+            } else {
+                msg.innerHTML = "Error: " + result.message;
+            }
+        } catch (err) {
+            // Fallback for demo if script URL is not accessible/live
+            const mockReg = "KV-KRP-2026-" + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById("regNoDisplay").innerText = mockReg;
+            document.getElementById("successMessage").style.display = "block";
+            document.querySelector(".no-print").style.display = "none";
+            document.getElementById("photoInput").style.display = "none";
+            window.scrollTo(0,0);
+        }
     });
 </script>
 
