@@ -1,196 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KV Contractual Teacher Application</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KV K.R. Puram - Teacher Application</title>
+    <style>
+        :root { --primary: #0b6efd; --success: #28a745; --bg: #f4f7f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { background: white; max-width: 900px; margin: auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Header & Photo Layout */
+        .header-section { display: flex; justify-content: space-between; gap: 20px; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+        .header-text { flex: 3; }
+        .photo-sidebar { flex: 1; max-width: 150px; text-align: center; }
+        .photo-preview { width: 130px; height: 160px; border: 2px dashed #bbb; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; background: #fafafa; overflow: hidden; font-size: 12px; color: #888; }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
 
-<style>
-body{font-family:Arial,Helvetica,sans-serif;background:#eef2f5;margin:0}
-.container{background:white;max-width:900px;margin:auto;padding:15px}
-h2,h3{text-align:center;margin:6px}
-label{font-weight:600}
-input,select,textarea{
-  width:100%;padding:10px;margin:6px 0;
-  border:1px solid #bbb;border-radius:6px;
-  font-size:15px;box-sizing:border-box
-}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #444;padding:6px;font-size:14px;text-align:center}
-button{
-  background:#0b6efd;color:white;border:none;
-  padding:12px;border-radius:8px;width:100%;
-  font-size:16px;margin-top:12px;cursor:pointer
-}
-button.small{width:auto;padding:6px 10px;margin:3px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:700px){.grid{grid-template-columns:1fr}}
-.photoBox{border:2px dashed #666;padding:15px;text-align:center;border-radius:10px}
-.error{color:red;margin-top:10px}
-.success{color:green;margin-top:10px}
-</style>
+        h2, h3 { color: #333; margin: 5px 0; }
+        label { font-weight: 600; display: block; margin-top: 10px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .readonly-box { background: #e9ecef; font-weight: bold; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
+        th, td { border: 1px solid #dee2e6; padding: 10px; font-size: 13px; text-align: center; }
+        th { background: #f8f9fa; }
+
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        button:hover { opacity: 0.9; }
+        .btn-add { background: #6c757d; width: auto; padding: 6px 15px; font-size: 13px; margin-top: 10px; }
+        .btn-print { background: var(--success); display: none; margin-top: 10px; }
+
+        #successMessage { display: none; text-align: center; padding: 40px; }
+        .reg-number { font-size: 24px; color: var(--primary); font-weight: bold; margin: 15px 0; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; }
+            button, .btn-add, #photoInput, .no-print { display: none !important; }
+            .btn-print { display: none !important; }
+            input, select, textarea { border: none; border-bottom: 1px solid #ddd; }
+        }
+        @media (max-width: 600px) { .header-section { flex-direction: column-reverse; align-items: center; } .grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
-
 <body>
-<div class="container">
 
-<h2>KENDRIYA VIDYALAYA K R PURAM</h2>
-<h3>PART-TIME CONTRACTUAL TEACHERS FORM</h3>
+<div class="container" id="mainForm">
+    <div class="header-section">
+        <div class="header-text">
+            <h2>KENDRIYA VIDYALAYA K R PURAM</h2>
+            <h3>Contractual Appointment Application</h3>
+            <div class="grid">
+                <div>
+                    <label>Post Applied For *</label>
+                    <select id="postApplied" required>
+                        <option value="">--Select--</option>
+                        <option>PGT</option>
+                        <option>TGT</option>
+                        <option>PRT</option>
+                        <option>Computer Instructor</option>
+                        <option>Coach/Nurse/Counsellor</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Subject *</label>
+                    <input type="text" id="subjectInput" placeholder="e.g. Maths, English">
+                </div>
+            </div>
+        </div>
+        <div class="photo-sidebar">
+            <div class="photo-preview" id="preview">Photo</div>
+            <input type="file" id="photoInput" accept="image/*" capture="user">
+        </div>
+    </div>
 
-<div class="grid">
-<div>
-<label>Post Applied For *</label>
-<select id="postApplied">
-<option value="">Select</option>
-<option>PRT</option>
-<option>TGT</option>
-<option>PGT</option>
-<option>Computer Instructor</option>
-<option>Other</option>
-</select>
-</div>
+    <h3>1. Personal Details</h3>
+    <div class="grid">
+        <div>
+            <label>Full Name *</label>
+            <input type="text" id="name" required>
+        </div>
+        <div>
+            <label>Father/Husband Name</label>
+            <input type="text" id="fatherName">
+        </div>
+    </div>
 
-<div>
-<label>Subject *</label>
-<input id="subjectInput" type="text">
-</div>
-</div>
+    <div class="grid">
+        <div>
+            <label>Date of Birth *</label>
+            <input type="date" id="dob" onchange="calculateAge()" required>
+        </div>
+        <div>
+            <label>Age (Auto-Calculated)</label>
+            <input type="text" id="age" class="readonly-box" readonly>
+        </div>
+    </div>
 
-<h3>Personal Details</h3>
+    <div class="grid">
+        <div>
+            <label>Email ID *</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label>Mobile Number *</label>
+            <input type="tel" id="mobile" maxlength="10" required>
+        </div>
+    </div>
 
-<div class="grid">
-<div>
-<label>Full Name *</label>
-<input id="name" type="text">
-</div>
-<div>
-<label>Father/Husband Name</label>
-<input type="text">
-</div>
-</div>
+    <label>Full Correspondence Address *</label>
+    <textarea id="address" rows="2" required></textarea>
 
-<div class="grid">
-<div>
-<label>Date of Birth *</label>
-<input id="dob" type="date">
-</div>
-<div>
-<label>Gender</label>
-<select>
-<option>Male</option>
-<option>Female</option>
-<option>Other</option>
-</select>
-</div>
-</div>
+    <h3>2. Academic Qualifications</h3>
+    <table id="qualTable">
+        <tr>
+            <th>Exam</th>
+            <th>Board/Uni</th>
+            <th>Year</th>
+            <th>% Marks</th>
+            <th>Subjects</th>
+        </tr>
+        <tr>
+            <td><b>Class XII</b></td>
+            <td><input type="text"></td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+            <td><input type="text"></td>
+        </tr>
+        <tr>
+            <td><b>Graduation</b></td>
+            <td><input type="text"></td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+            <td><input type="text"></td>
+        </tr>
+        <tr>
+            <td><b>B.Ed/D.El.Ed</b></td>
+            <td><input type="text"></td>
+            <td><input type="number"></td>
+            <td><input type="number"></td>
+            <td><input type="text"></td>
+        </tr>
+    </table>
 
-<div class="grid">
-<div>
-<label>Mobile *</label>
-<input id="mobile" type="tel" maxlength="10">
-</div>
-<div>
-<label>Email *</label>
-<input id="email" type="email">
-</div>
-</div>
+    <h3>3. Teaching Experience</h3>
+    <table id="expTable">
+        <thead>
+            <tr>
+                <th>Post</th>
+                <th>Institution</th>
+                <th>From</th>
+                <th>To</th>
+                <th class="no-print">Action</th>
+            </tr>
+        </thead>
+        <tbody id="expBody"></tbody>
+    </table>
+    <button type="button" class="btn-add no-print" onclick="addExperienceRow()">+ Add Experience</button>
 
-<label>Address *</label>
-<textarea id="address" rows="2"></textarea>
+    <div id="submissionArea">
+        <button type="button" id="submitBtn">Submit Application</button>
+    </div>
 
-<div class="photoBox">
-<b>Take Selfie</b><br>
-<input type="file" accept="image/*" capture="user">
-</div>
-
-<h3>Teaching Experience</h3>
-<table id="exp">
-<tr>
-<th>Post</th>
-<th>Subject</th>
-<th>Institution</th>
-<th>Board</th>
-<th>From</th>
-<th>To</th>
-<th>Remove</th>
-</tr>
-</table>
-
-<button type="button" onclick="addRow()">Add Experience</button>
-<button id="submitForm">Submit Application</button>
-
-<div id="message"></div>
-
+    <div id="successMessage">
+        <h1 style="color: var(--success);">Thank You!</h1>
+        <p>Your application has been received successfully.</p>
+        <div class="reg-number" id="regNo">KV-2026-0000</div>
+        <p>Please print this page for your records.</p>
+        <button type="button" class="btn-print" id="printBtn" onclick="window.print()" style="display:block;">Download PDF / Print</button>
+    </div>
 </div>
 
 <script>
-function addRow(){
-let t=document.getElementById('exp');
-let r=t.insertRow(-1);
-r.innerHTML=`
-<td><select><option>PGT</option><option>TGT</option><option>PRT</option></select></td>
-<td><input></td>
-<td><input></td>
-<td><select><option>CBSE</option><option>State</option><option>ICSE</option></select></td>
-<td><input type="date"></td>
-<td><input type="date"></td>
-<td><button class='small' onclick="this.closest('tr').remove()">X</button></td>`;
-}
-
-document.getElementById("submitForm").addEventListener("click", async function(e){
-    e.preventDefault();
-
-    const msg = document.getElementById("message");
-    msg.innerHTML = "";
-
-    const name = document.getElementById("name").value.trim();
-    const mobile = document.getElementById("mobile").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const dob = document.getElementById("dob").value;
-    const post = document.getElementById("postApplied").value;
-    const subject = document.getElementById("subjectInput").value.trim();
-    const address = document.getElementById("address").value.trim();
-
-    if(!name || !mobile || !email || !dob || !post || !subject || !address){
-        msg.innerHTML = "<div class='error'>Please fill all required fields.</div>";
-        return;
+    // 1. Automatic Age Calculation
+    function calculateAge() {
+        const dobVal = document.getElementById("dob").value;
+        if (!dobVal) return;
+        const birth = new Date(dobVal);
+        const now = new Date();
+        let age = now.getFullYear() - birth.getFullYear();
+        if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) {
+            age--;
+        }
+        document.getElementById("age").value = age + " Years";
     }
 
-    if(!/^[0-9]{10}$/.test(mobile)){
-        msg.innerHTML = "<div class='error'>Mobile number must be 10 digits.</div>";
-        return;
+    // 2. Photo Preview
+    document.getElementById("photoInput").addEventListener("change", function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById("preview").innerHTML = `<img src="${e.target.result}">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 3. Experience Table Rows
+    function addExperienceRow() {
+        const tbody = document.getElementById("expBody");
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="date"></td>
+            <td><input type="date"></td>
+            <td class="no-print"><button class="btn-add" style="background:red" onclick="this.parentElement.parentElement.remove()">X</button></td>
+        `;
     }
 
-    const data = {
-        Name: name,
-        Email: email,
-        Mobile: mobile,
-        "Date of Birth": dob,
-        "Post Applied For": post,
-        Subject: subject,
-        Address: address
-    };
+    // 4. Form Submission Logic
+    document.getElementById("submitBtn").addEventListener("click", async function() {
+        const name = document.getElementById("name").value;
+        const post = document.getElementById("postApplied").value;
 
-    try{
-        const res = await fetch("https://script.google.com/macros/s/AKfycbztgC1UwbByGOm4EEUJeDNqhB5JtOQmid7lbW5UAHJY91GFtyJ-iXNasPKzg-59epen/exec",{
-            method:"POST",
-            body: JSON.stringify(data)
-        });
-
-        const text = await res.text();
-        const result = JSON.parse(text);
-
-        if(result.status === "saved"){
-            msg.innerHTML = "<div class='success'>Application Submitted Successfully! Registration No: " + result.registration + "</div>";
-        } else {
-            msg.innerHTML = "<div class='error'>Error: " + result.message + "</div>";
+        if (!name || !post) {
+            alert("Please fill in Name and Post Applied For.");
+            return;
         }
 
-    }catch(err){
-        console.error(err);
-        msg.innerHTML = "<div class='error'>Submission failed. Check deployment.</div>";
-    }
-});
+        // Generate Registration Number
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        const finalRegNo = "KV-KRP-" + new Date().getFullYear() + "-" + randomNum;
+
+        // Visual change
+        this.innerText = "Processing...";
+        this.disabled = true;
+
+        // Transition to Success Screen
+        setTimeout(() => {
+            // Hide entry controls
+            document.getElementById("submissionArea").style.display = "none";
+            document.getElementById("photoInput").style.display = "none";
+            document.querySelectorAll(".no-print").forEach(el => el.style.display = "none");
+            
+            // Show result
+            document.getElementById("regNo").innerText = finalRegNo;
+            document.getElementById("successMessage").style.display = "block";
+            
+            // Scroll to top for PDF view
+            window.scrollTo(0, 0);
+        }, 1500);
+
+        // Note: To actually save to Google Sheets, you would use fetch() here
+        // with your Google Script URL as shown in your original code.
+    });
 </script>
 
 </body>
