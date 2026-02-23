@@ -1,8 +1,8 @@
 Flask
 flask-cors
-gspread
-oauth2client
 pandas
+openpyxl
 reportlab
-pillow
+Pillow
 gunicorn
+requests
