@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,send_file
 from flask_cors import CORS
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
-import os, base64
 from io import BytesIO
+import os, base64
+import pandas as pd
+
 
 app = Flask(__name__)
 CORS(app)
@@ -54,6 +56,31 @@ def save_pdf():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+@app.route("/download")
+def download_excel():
+    try:
+        # Read your stored data (adjust source as needed)
+        # If you store data in Google Sheet, fetch from there.
+        # If you store locally, read from CSV or database.
+
+        # Example dummy data:
+        data = [
+            {"Name": "Test User", "Post": "PGT", "Subject": "Math"}
+        ]
+
+        df = pd.DataFrame(data)
+
+        file_path = "applications_data.xlsx"
+        df.to_excel(file_path, index=False)
+
+        return send_file(
+            file_path,
+            as_attachment=True
+        )
+
+    except Exception as e:
+        return str(e)
     
 
 if __name__ == "__main__":
