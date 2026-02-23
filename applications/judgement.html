@@ -3,122 +3,70 @@
 <head>
     <title>Interview Judgement Sheet</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            color: #000;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .info p {
-            margin: 6px 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #000;
-            padding: 10px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .remarks {
-            margin-top: 30px;
-        }
-
-        .signature {
-            margin-top: 60px;
-        }
-
-        @media print {
-            body {
-                margin: 25px;
-            }
-        }
+        body { font-family: Arial; margin: 40px; }
+        h2 { text-align: center; }
+        .info p { margin: 6px 0; }
+        table { width:100%; border-collapse: collapse; margin-top:20px; }
+        th, td { border:1px solid #000; padding:8px; text-align:center; }
+        th { background:#f2f2f2; }
+        @media print { button { display:none; } }
+        button { margin-top:20px; padding:6px 12px; }
     </style>
 </head>
 <body>
 
-<h2>
-KENDRIYA VIDYALAYA K.R. PURAM<br>
-INTERVIEW JUDGEMENT SHEET
-</h2>
+<h2>KENDRIYA VIDYALAYA K.R. PURAM<br>INTERVIEW JUDGEMENT SHEET</h2>
 
 <div class="info">
-    <p><strong>Candidate Name:</strong> ____________________________________________</p>
-    <p><strong>Post Applied:</strong> ____________________________________________</p>
-    <p><strong>Subject:</strong> ____________________________________________</p>
-    <p><strong>Date:</strong> ____________________</p>
-    <p><strong>Panel Member Name:</strong> ____________________________________</p>
+    <p><strong>Candidate Name:</strong> <span id="name"></span></p>
+    <p><strong>Post Applied:</strong> <span id="post"></span></p>
+    <p><strong>Subject:</strong> <span id="subject"></span></p>
+    <p><strong>Date:</strong> <span id="today"></span></p>
+    <p><strong>Panel Member:</strong> ________________________</p>
 </div>
 
 <table>
-    <tr>
-        <th>Sl. No.</th>
-        <th>Criteria</th>
-        <th>Max Marks</th>
-        <th>Marks Awarded</th>
-    </tr>
-    <tr>
-        <td>1</td>
-        <td>Subject Knowledge</td>
-        <td>10</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>Teaching Skills</td>
-        <td>10</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>3</td>
-        <td>ICT Skills</td>
-        <td>10</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>4</td>
-        <td>Language</td>
-        <td>10</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>5</td>
-        <td>Experience</td>
-        <td>10</td>
-        <td></td>
-    </tr>
-    <tr>
-        <th colspan="2">Total</th>
-        <th>50</th>
-        <th></th>
-    </tr>
+<tr><th>Sl</th><th>Criteria</th><th>Max</th><th>Marks</th></tr>
+<tr><td>1</td><td>Subject Knowledge</td><td>10</td><td></td></tr>
+<tr><td>2</td><td>Teaching Skills</td><td>10</td><td></td></tr>
+<tr><td>3</td><td>ICT Skills</td><td>10</td><td></td></tr>
+<tr><td>4</td><td>Language</td><td>10</td><td></td></tr>
+<tr><td>5</td><td>Experience</td><td>10</td><td></td></tr>
+<tr><th colspan="2">Total</th><th>50</th><th></th></tr>
 </table>
 
-<div class="remarks">
-    <p><strong>Remarks:</strong></p>
-    <p>______________________________________________________________________________</p>
-    <p>______________________________________________________________________________</p>
-    <p>______________________________________________________________________________</p>
-</div>
+<p style="margin-top:30px;"><strong>Remarks:</strong></p>
+<p>______________________________________________________________</p>
+<p>______________________________________________________________</p>
 
-<div class="signature">
-    <p><strong>Signature of Panel Member:</strong></p>
-    <p>________________________________________</p>
-</div>
+<p style="margin-top:50px;"><strong>Signature:</strong> __________________________</p>
+
+<button onclick="window.print()">Print</button>
+
+<script>
+const API_BASE = "https://kv-teacher-form.onrender.com";
+
+const params = new URLSearchParams(window.location.search);
+const reg = params.get("reg");
+
+document.getElementById("today").innerText =
+    new Date().toISOString().split("T")[0];
+
+async function loadCandidate() {
+    const res = await fetch(`${API_BASE}/data`);
+    const data = await res.json();
+
+    const candidate = data.find(c => c.RegistrationNo === reg);
+
+    if(candidate){
+        document.getElementById("name").innerText = candidate.Name;
+        document.getElementById("post").innerText = candidate.PostApplied;
+        document.getElementById("subject").innerText = candidate.Subject;
+    }
+}
+
+loadCandidate();
+</script>
 
 </body>
 </html>
